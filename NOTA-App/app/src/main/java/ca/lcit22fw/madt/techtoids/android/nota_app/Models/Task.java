@@ -7,7 +7,8 @@ public class Task {
     private String _description;
     private ArrayList<SubTask> _subTaskList;
 
-    public Task() {
+    public Task(String id, String title, String description) {
+        this._meta = new Meta(id, title);
 
     }
 

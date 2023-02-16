@@ -9,6 +9,8 @@ public class Meta {
     public Meta(String id, String title) {
         this._id = id;
         this._title = title;
+        setLiveCreatedDate();
+        setLiveModifiedDate();
 //        this._createdDate = createdDate;
 //        this._modifiedDate = createdDate;
     }
@@ -30,13 +32,17 @@ public class Meta {
     public void setCreatedDate(String createdDate) {
         this._createdDate = createdDate;
     }
+    public void setLiveCreatedDate() {
+
+    }
+
     public String getModifiedDate() {
         return this._modifiedDate;
     }
     public void setModifiedDate(String modifiedDate) {
         this._modifiedDate = modifiedDate;
     }
-    public void setModifiedDate() {
+    public void setLiveModifiedDate() {
 
     }
 }
