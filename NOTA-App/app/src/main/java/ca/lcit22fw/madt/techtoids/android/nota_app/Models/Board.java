@@ -1,31 +1,76 @@
 package ca.lcit22fw.madt.techtoids.android.nota_app.Models;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 public class Board {
-    private Meta _meta;
-    private ArrayList<Task> _taskList;
+    private final String taskListId = UUID.randomUUID().toString();
+    private String title;
+    private List<ParentTask> tasks = new ArrayList<>();
 
-    public Board(Meta meta, ArrayList<Task> taskList) {
-        this._meta = meta;
-        this._taskList = taskList;
+    private String userId;
+    private Date updatedAt;
+
+    public Board() {
     }
 
-//    public Board()
-
-    public Meta getMeta() {
-        return this._meta;
+    public Board(String title, List<ParentTask> tasks, String userId) {
+        this.title = title;
+        this.tasks = tasks;
+        this.userId = userId;
     }
 
-    public void setMeta(Meta meta) {
-        this._meta = meta;
+    public String getTaskListId() {
+        return taskListId;
     }
 
-    public ArrayList<Task> getTaskList() {
-        return _taskList;
+    public String getTitle() {
+        return title;
     }
 
-    public void setTaskList(ArrayList<Task> taskList) {
-        this._taskList = taskList;
+    public List<ParentTask> getTasks() {
+        return tasks;
+    }
+
+    @ServerTimestamp
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void addParentTask(ParentTask task){
+        insertParentTask(tasks.size(), task);
+    }
+
+    public void insertParentTask(int position, ParentTask task){
+        task.setTaskListId(getTaskListId());
+        tasks.remove(task);
+        int index = Math.min(position, tasks.size());
+        tasks.add(index, task);
+        task.onUpdate();
+        updatedAt = Helper.getUTCDate();
+        refreshOrder();
+    }
+
+    private void refreshOrder(){
+        for (int i = 0; i < tasks.size(); i++) {
+            ParentTask task = tasks.get(i);
+            task.setOrder(i);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Board{" +
+                "taskListId='" + taskListId + '\'' +
+                ", title='" + title + '\'' +
+                ", tasks=" + tasks +
+                ", updatedAt=" + updatedAt +
+                '}';
     }
 }
