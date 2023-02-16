@@ -12,7 +12,7 @@
         android:id="@+id/img_app_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@mipmap/ic_launcher_round"
+        android:src="@mipmap/ic_launcher_foreground"
         android:layout_marginBottom="120dp"/>
 
     <ProgressBar
