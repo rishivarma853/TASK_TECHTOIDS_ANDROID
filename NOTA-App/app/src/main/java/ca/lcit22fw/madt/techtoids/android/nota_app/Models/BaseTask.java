@@ -16,6 +16,8 @@ public class BaseTask {
 
     private Date updatedAt;
 
+    private Date dueDate;
+
     private ArrayList<String> attachmentList = new ArrayList<>();
 
     public BaseTask() {
