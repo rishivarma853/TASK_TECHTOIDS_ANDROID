@@ -15,6 +15,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@id/searchCard"
         app:layout_constraintEnd_toEndOf="parent" />
+
     <androidx.cardview.widget.CardView
         android:id="@+id/searchCard"
         android:layout_width="wrap_content"
@@ -26,7 +27,6 @@
         app:cardPreventCornerOverlap="true"
         app:cardUseCompatPadding="true"
         app:layout_constraintTop_toTopOf="parent"
-
         tools:ignore="MissingConstraints">
         <SearchView
             android:id="@+id/idSV"
@@ -37,8 +37,19 @@
             android:queryHint="Search"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+           />
     </androidx.cardview.widget.CardView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/taskList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/searchCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:listitem="@layout/activity_task_list_item"/>
+    
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
