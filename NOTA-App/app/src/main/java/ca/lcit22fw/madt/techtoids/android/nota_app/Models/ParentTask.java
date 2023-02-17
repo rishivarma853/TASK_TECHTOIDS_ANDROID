@@ -6,7 +6,7 @@ import java.util.List;
 //import javax.annotation.Nullable;
 
 public class ParentTask extends BaseTask {
-    private List<SubTask> childTasks = new ArrayList<>();
+    private final List<SubTask> childTasks = new ArrayList<>();
 
     public ParentTask() {
     }

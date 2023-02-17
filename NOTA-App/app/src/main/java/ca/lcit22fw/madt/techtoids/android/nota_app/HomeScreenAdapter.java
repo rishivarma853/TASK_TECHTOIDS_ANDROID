@@ -8,7 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 public class HomeScreenAdapter extends BaseAdapter {
     Context context;
-    int whiteboardImg[];
+    int[] whiteboardImg;
     LayoutInflater inflter;
     public HomeScreenAdapter(Context applicationContext, int[] logos) {
         this.context = applicationContext;

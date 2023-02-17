@@ -48,7 +48,7 @@ public class SignInActivity extends AppCompatActivity {
         signInLauncher.launch(signInIntent);
     }
 
-    private ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(new FirebaseAuthUIActivityResultContract(), (result) -> {
+    private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(new FirebaseAuthUIActivityResultContract(), (result) -> {
         IdpResponse response = result.getIdpResponse();
         if (result.getResultCode() == RESULT_OK) {
             navigateToHome(true);

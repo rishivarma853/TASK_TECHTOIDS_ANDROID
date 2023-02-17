@@ -11,7 +11,7 @@ import android.widget.GridView;
 public class HomeScreenActivity extends AppCompatActivity {
 
     GridView simpleGrid;
-    int whiteboardImg[] = {R.drawable.whiteboard,R.drawable.whiteboard};
+    int[] whiteboardImg = {R.drawable.whiteboard,R.drawable.whiteboard};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
