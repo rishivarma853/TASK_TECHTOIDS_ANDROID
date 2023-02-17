@@ -2,10 +2,14 @@ package ca.lcit22fw.madt.techtoids.android.nota_app;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.GridView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -39,9 +43,30 @@ public class HomeScreenActivity extends AppCompatActivity {
         fltbtnAddNewBoard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                
-            }
-        });
+                AlertDialog.Builder alert = new AlertDialog.Builder(HomeScreenActivity.this);
+                LayoutInflater inflater = HomeScreenActivity.this.getLayoutInflater();
+
+                alert.setTitle("Adding a new board ");
+                alert.setMessage("Enter Name");
+                 EditText input = new EditText(HomeScreenActivity.this);
+                alert.setView(input);
+
+                alert.setPositiveButton("ADD", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                String value = String.valueOf(input.getText());
+                                // Do something with value!
+                            }
+                }).setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+
+                            }
+                        })
+                        .create().show();
+
+
 
     }
-}
+});
+    }}
