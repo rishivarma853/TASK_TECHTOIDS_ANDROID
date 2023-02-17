@@ -1,57 +1,29 @@
 package ca.lcit22fw.madt.techtoids.android.nota_app.Models;
 
-public class SubTask {
-    private Meta _meta;
-    private String _description;
-    private String _dueDate;
-    private String _taskStatus;
-    private String _parentID;
+public class SubTask extends BaseTask {
+    private String parentTaskId;
 
-    public SubTask(String id, String title, String description, String dueDate, String taskStatus, String parentID) {
-        this._meta = new Meta(id, title);
-        this._description = description;
-        this._dueDate = dueDate;
-        this._taskStatus = taskStatus;
-        this._parentID = parentID;
+    public SubTask() {
     }
 
-    public Meta getMeta() {
-        return this._meta;
+    public SubTask(int order, String title, String description) {
+        super(order, title, description);
     }
 
-    public void setMeta(Meta meta) {
-        this._meta = meta;
+    public SubTask(int order, String title, String description, String parentTaskId) {
+        super(order, title, description);
+        this.parentTaskId = parentTaskId;
     }
 
-    public String getDescription() {
-        return this._description;
+    public String getParentTaskId() {
+        return parentTaskId;
     }
 
-    public void setDescription(String description) {
-        this._description = description;
+    public void setParentTaskId(String parentTaskId) {
+        this.parentTaskId = parentTaskId;
+        onUpdate();
     }
 
-    public String getDueDate() {
-        return this._dueDate;
-    }
 
-    public void setDueDate(String dueDate) {
-        this._dueDate = dueDate;
-    }
 
-    public String getTaskStatus() {
-        return this._taskStatus;
-    }
-
-    public void setTaskStatus(String taskStatus) {
-        this._taskStatus = taskStatus;
-    }
-
-    public String getParentID() {
-        return this._parentID;
-    }
-
-    public void setParentID(String parentID) {
-        this._parentID = parentID;
-    }
 }

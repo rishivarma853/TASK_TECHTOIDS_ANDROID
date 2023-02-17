@@ -1,13 +1,12 @@
 package ca.lcit22fw.madt.techtoids.android.nota_app.Models;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Nullable;
+//import javax.annotation.Nullable;
 
-public class ParentTask extends TaskBase {
-    private List<ChildTask> childTasks = new ArrayList<>();
+public class ParentTask extends BaseTask {
+    private List<SubTask> childTasks = new ArrayList<>();
 
     public ParentTask() {
     }
@@ -16,15 +15,15 @@ public class ParentTask extends TaskBase {
         super(order, title, description);
     }
 
-    public List<ChildTask> getChildTasks() {
+    public List<SubTask> getChildTasks() {
         return childTasks;
     }
 
-    public void addChildTask(ChildTask task){
+    public void addChildTask(SubTask task){
         insertChildTask(childTasks.size(), task);
     }
 
-    public void insertChildTask(int position, ChildTask task){
+    public void insertChildTask(int position, SubTask task){
         task.setParentTaskId(getTaskId());
         childTasks.remove(task);
         int index = Math.min(position, childTasks.size());
@@ -36,7 +35,7 @@ public class ParentTask extends TaskBase {
 
     private void refreshOrder(){
         for (int i = 0; i < childTasks.size(); i++) {
-            ChildTask task = childTasks.get(i);
+            SubTask task = childTasks.get(i);
             task.setOrder(i);
         }
     }

@@ -1,5 +1,7 @@
 package ca.lcit22fw.madt.techtoids.android.nota_app.Models;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -12,6 +14,8 @@ public class Board {
 
     private String userId;
     private Date updatedAt;
+
+    private LatLng location;
 
     public Board() {
     }
@@ -34,7 +38,6 @@ public class Board {
         return tasks;
     }
 
-    @ServerTimestamp
     public Date getUpdatedAt() {
         return updatedAt;
     }
@@ -42,6 +45,8 @@ public class Board {
     public String getUserId() {
         return userId;
     }
+
+    
 
     public void addParentTask(ParentTask task){
         insertParentTask(tasks.size(), task);
