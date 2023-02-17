@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class Board {
-    private final String taskListId = UUID.randomUUID().toString();
+    private final String boardId = UUID.randomUUID().toString();
+
     private String title;
     private List<ParentTask> tasks = new ArrayList<>();
 
@@ -26,8 +27,8 @@ public class Board {
         this.userId = userId;
     }
 
-    public String getTaskListId() {
-        return this.taskListId;
+    public String getBoardId() {
+        return this.boardId;
     }
 
     public String getTitle() {
@@ -75,7 +76,7 @@ public class Board {
     }
 
     public void insertParentTask(int position, ParentTask task){
-        task.setTaskListId(getTaskListId());
+        task.setTaskListId(getBoardId());
         tasks.remove(task);
         int index = Math.min(position, tasks.size());
         tasks.add(index, task);
@@ -94,7 +95,7 @@ public class Board {
     @Override
     public String toString() {
         return "Board{" +
-                "taskListId='" + taskListId + '\'' +
+                "taskListId='" + boardId + '\'' +
                 ", title='" + title + '\'' +
                 ", tasks=" + tasks +
                 ", updatedAt=" + updatedAt +
