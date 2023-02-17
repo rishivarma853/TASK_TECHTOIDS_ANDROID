@@ -5,17 +5,29 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".HomeScreenActivity">
+    <ImageButton
+        android:id="@+id/sort_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="70dp"
+        android:layout_margin="8dp"
+        android:backgroundTint="@color/white"
+        android:src="@drawable/baseline_sort_24"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/searchCard"
+        app:layout_constraintEnd_toEndOf="parent" />
     <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
+        android:id="@+id/searchCard"
+        android:layout_width="wrap_content"
         android:layout_height="90dp"
         app:cardElevation="10dp"
-        app:cardCornerRadius="20dp"
+        app:cardCornerRadius="0dp"
         app:cardBackgroundColor="@color/white"
         app:cardMaxElevation="12dp"
         app:cardPreventCornerOverlap="true"
         app:cardUseCompatPadding="true"
         app:layout_constraintTop_toTopOf="parent"
-        >
+
+        tools:ignore="MissingConstraints">
         <SearchView
             android:id="@+id/idSV"
             android:layout_width="match_parent"
@@ -25,7 +37,7 @@
             android:queryHint="Search"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            />
     </androidx.cardview.widget.CardView>
     <GridView
         android:id="@+id/simpleGridView"
@@ -39,6 +51,7 @@
         android:layout_height="wrap_content"
         android:src="@drawable/baseline_add_24"
         android:backgroundTint="@color/teritiary_color"
+        android:tint="@color/white"
         tools:ignore="MissingConstraints,SpeakableTextPresentCheck"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
