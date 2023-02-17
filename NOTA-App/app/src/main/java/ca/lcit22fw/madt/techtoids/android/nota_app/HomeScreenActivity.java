@@ -8,15 +8,19 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 public class HomeScreenActivity extends AppCompatActivity {
 
     GridView simpleGrid;
+    FloatingActionButton fltbtnAddNewBoard;
     int[] whiteboardImg = {R.drawable.whiteboard,R.drawable.whiteboard};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
         simpleGrid = (GridView) findViewById(R.id.simpleGridView); // init GridView
+        fltbtnAddNewBoard = findViewById(R.id.fab);
         // Create an object of CustomAdapter and set Adapter to GirdView
         HomeScreenAdapter customAdapter = new HomeScreenAdapter(getApplicationContext(), whiteboardImg);
         simpleGrid.setAdapter(customAdapter);
@@ -30,5 +34,6 @@ public class HomeScreenActivity extends AppCompatActivity {
                 startActivity(intent); // start Intent
             }
         });
+
     }
 }
