@@ -8,16 +8,16 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 public class HomeScreenAdapter extends BaseAdapter {
     Context context;
-    int logos[];
+    int whiteboardImg[];
     LayoutInflater inflter;
     public HomeScreenAdapter(Context applicationContext, int[] logos) {
         this.context = applicationContext;
-        this.logos = logos;
+        this.whiteboardImg = logos;
         inflter = (LayoutInflater.from(applicationContext));
     }
     @Override
     public int getCount() {
-        return logos.length;
+        return whiteboardImg.length;
     }
     @Override
     public Object getItem(int i) {
@@ -31,7 +31,7 @@ public class HomeScreenAdapter extends BaseAdapter {
     public View getView(int i, View view, ViewGroup viewGroup) {
         view = inflter.inflate(R.layout.activity_home_item, null); // inflate the layout
         ImageView icon = (ImageView) view.findViewById(R.id.boardImg); // get the reference of ImageView
-        icon.setImageResource(logos[i]); // set logo images
+        icon.setImageResource(whiteboardImg[i]); // set logo images
         return view;
     }
 }
