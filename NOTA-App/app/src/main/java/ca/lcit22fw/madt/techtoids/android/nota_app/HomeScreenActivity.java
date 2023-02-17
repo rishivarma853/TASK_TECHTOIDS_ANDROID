@@ -36,6 +36,12 @@ public class HomeScreenActivity extends AppCompatActivity {
                 startActivity(intent); // start Intent
             }
         });
+        fltbtnAddNewBoard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                
+            }
+        });
 
     }
 }
