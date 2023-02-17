@@ -11,6 +11,10 @@ public class BoardList {
 
     ArrayList<Board> boardList = new ArrayList<>();
 
+    public BoardList() {
+
+    }
+
     public BoardList(ArrayList<Board> boardList) {
         this.boardList = boardList;
     }

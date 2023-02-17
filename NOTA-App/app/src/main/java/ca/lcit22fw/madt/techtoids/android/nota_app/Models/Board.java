@@ -35,7 +35,7 @@ public class Board {
         return this.title;
     }
 
-    public List<ParentTask> getTasks() {
+    public List<ParentTask> getAllTasks() {
         return this.tasks;
     }
 

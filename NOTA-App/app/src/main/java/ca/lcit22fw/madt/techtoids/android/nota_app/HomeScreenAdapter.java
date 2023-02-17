@@ -6,18 +6,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+
+import ca.lcit22fw.madt.techtoids.android.nota_app.Models.Home;
 public class HomeScreenAdapter extends BaseAdapter {
     Context context;
-    int[] whiteboardImg;
     LayoutInflater inflter;
-    public HomeScreenAdapter(Context applicationContext, int[] logos) {
+    public HomeScreenAdapter(Context applicationContext) {
         this.context = applicationContext;
-        this.whiteboardImg = logos;
         inflter = (LayoutInflater.from(applicationContext));
     }
     @Override
     public int getCount() {
-        return whiteboardImg.length;
+        return Home.home.getBoardList().size();
     }
     @Override
     public Object getItem(int i) {
@@ -31,7 +34,9 @@ public class HomeScreenAdapter extends BaseAdapter {
     public View getView(int i, View view, ViewGroup viewGroup) {
         view = inflter.inflate(R.layout.activity_home_item, null); // inflate the layout
         ImageView icon = (ImageView) view.findViewById(R.id.boardImg); // get the reference of ImageView
-        icon.setImageResource(whiteboardImg[i]); // set logo images
+        TextView boardTitle = view.findViewById(R.id.BoardTitle);
+        icon.setImageResource(R.drawable.whiteboard); // set logo images
+        boardTitle.setText(Home.home.getBoardList().get(i).getTitle());
         return view;
     }
 }
