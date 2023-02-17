@@ -14,5 +14,5 @@
     <color name="primary_color">@color/chambray</color>
     <color name="secondary_color">@color/downy</color>
     <color name="teritiary_color">@color/curious_blue</color>
-    <color name="quadary_color">@color/steel_blue</color>
+    <color name="quadrary_color">@color/steel_blue</color>
 </resources>
