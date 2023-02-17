@@ -27,26 +27,48 @@ public class Board {
     }
 
     public String getTaskListId() {
-        return taskListId;
+        return this.taskListId;
     }
 
     public String getTitle() {
-        return title;
+        return this.title;
     }
 
     public List<ParentTask> getTasks() {
-        return tasks;
+        return this.tasks;
     }
 
     public Date getUpdatedAt() {
-        return updatedAt;
+        return this.updatedAt;
     }
 
     public String getUserId() {
-        return userId;
+        return this.userId;
     }
 
-    
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setTasks(List<ParentTask> tasks) {
+        this.tasks = tasks;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public LatLng getLocation() {
+        return this.location;
+    }
+
+    public void setLocation(LatLng location) {
+        this.location = location;
+    }
 
     public void addParentTask(ParentTask task){
         insertParentTask(tasks.size(), task);
