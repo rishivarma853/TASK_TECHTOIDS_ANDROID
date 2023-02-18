@@ -21,4 +21,6 @@
     <color name="task_inprogress_background">#FFAAAAFF</color>
     <color name="task_completed_foreground">#FF008800</color>
     <color name="task_completed_background">#FFAAFFAA</color>
+    <color name="error">#f44336</color>
+    <color name="warning">#ffa726</color>
 </resources>

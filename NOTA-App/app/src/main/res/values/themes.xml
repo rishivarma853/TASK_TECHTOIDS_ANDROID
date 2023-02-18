@@ -15,7 +15,7 @@
     </style>
 
     <style name="DialogStyle" parent="Theme.AppCompat.Dialog">
-        <item name="background">@drawable/bg_window</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
     <style name="Circular">
