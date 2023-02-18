@@ -25,6 +25,8 @@ public class TaskScreenActivity extends AppCompatActivity {
             startSignIn();
             return;
         }
+
+        binding.home.setOnClickListener(v -> {finish();});
     }
 
     @Override

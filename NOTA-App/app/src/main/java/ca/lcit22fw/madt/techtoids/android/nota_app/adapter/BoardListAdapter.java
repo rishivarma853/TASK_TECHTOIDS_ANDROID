@@ -10,6 +10,7 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 
 import ca.lcit22fw.madt.techtoids.android.nota_app.databinding.BoardItemBinding;
 import ca.lcit22fw.madt.techtoids.android.nota_app.model.Board;
+import ca.lcit22fw.madt.techtoids.android.nota_app.ui.AvatarPlaceholder;
 import ca.lcit22fw.madt.techtoids.android.nota_app.ui.BoardViewHolder;
 
 public class BoardListAdapter extends FirestoreRecyclerAdapter<Board, BoardViewHolder> {
@@ -22,7 +23,7 @@ public class BoardListAdapter extends FirestoreRecyclerAdapter<Board, BoardViewH
     @Override
     protected void onBindViewHolder(@NonNull BoardViewHolder holder, int position, @NonNull Board model) {
         holder.binding.boardTitle.setText(model.getTitle());
-
+        holder.binding.boardAvatar.setImageDrawable(new AvatarPlaceholder(model.getTitle(), 50));
         holder.binding.getRoot().setOnClickListener(v -> {
             onItemClickListener.onItemClick(model);
         });

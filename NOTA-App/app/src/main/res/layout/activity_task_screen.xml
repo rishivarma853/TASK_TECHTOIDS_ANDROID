@@ -24,15 +24,24 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="horizontal">
-
+            <ImageButton
+                android:id="@+id/home"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="8dp"
+                android:backgroundTint="@color/white"
+                android:src="@drawable/arrow_back" />
             <SearchView
                 android:id="@+id/search_bar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:clickable="false"
                 android:iconifiedByDefault="false"
                 android:queryBackground="@null"
-                android:queryHint="Search" />
+                android:queryHint="Search"
+                android:searchIcon="@null"
+                app:layout_constrainedHeight="false" />
 
             <ImageButton
                 android:id="@+id/sort_menu"
@@ -53,15 +62,5 @@
         app:layout_constraintTop_toBottomOf="@id/header_layout"
         tools:listitem="@layout/activity_task_list_item" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="20dp"
-        android:layout_marginBottom="20dp"
-        android:backgroundTint="@color/teritiary_color"
-        android:src="@drawable/baseline_add_24"
-        android:tint="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+    <include android:id="@+id/fab_layout" layout="@layout/fab"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -13,8 +13,12 @@
         <item name="android:statusBarColor">@color/primary_color</item>
         <!-- Customize your theme here. -->
     </style>
+
     <style name="DialogStyle" parent="Theme.AppCompat.Dialog">
-        <item name="android:windowMinWidthMajor">80%</item>
-        <item name="android:windowMinWidthMinor">80%</item>
+        <item name="background">@drawable/bg_window</item>
+    </style>
+
+    <style name="Circular">
+        <item name="cornerSize">50%</item>
     </style>
 </resources>

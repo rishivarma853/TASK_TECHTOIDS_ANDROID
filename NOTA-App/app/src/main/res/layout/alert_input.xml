@@ -5,13 +5,11 @@
     android:layout_height="wrap_content"
     android:padding="8dp">
 
-
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:boxBackgroundColor="@android:color/transparent"
-        >
+        app:boxBackgroundColor="@android:color/transparent">
 
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"

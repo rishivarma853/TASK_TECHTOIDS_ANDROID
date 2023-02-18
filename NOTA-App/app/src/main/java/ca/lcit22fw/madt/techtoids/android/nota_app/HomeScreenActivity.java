@@ -53,7 +53,7 @@ public class HomeScreenActivity extends AppCompatActivity {
         adapter = new BoardListAdapter(options, this::onItemClick);
         binding.boardList.setAdapter(adapter);
 
-        binding.fab.setOnClickListener(view -> {
+        binding.fabLayout.fab.setOnClickListener(view -> {
             showDialog();
         });
     }
@@ -68,15 +68,18 @@ public class HomeScreenActivity extends AppCompatActivity {
 
     private void showDialog() {
         Dialog dialog = new Dialog(this, R.style.DialogStyle);
+        dialog.setCancelable(false);
+
         BoardDialogBoxBinding boardDialogBoxBinding = BoardDialogBoxBinding.inflate(dialog.getLayoutInflater());
 
         dialog.setContentView(boardDialogBoxBinding.getRoot());
 
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_window);
-
         boardDialogBoxBinding.btnClose.setOnClickListener(view -> {
             dialog.dismiss();
-            String value = String.valueOf(boardDialogBoxBinding.editText.getText());
+        });
+        boardDialogBoxBinding.btnYes.setOnClickListener(view -> {
+            dialog.dismiss();
+            String value = String.valueOf(boardDialogBoxBinding.input.getEditText().getText());
             Board board = new Board();
             board.setTitle(value);
             board.setUpdatedAt(new Date());
