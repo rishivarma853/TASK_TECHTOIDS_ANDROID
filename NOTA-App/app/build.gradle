@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'ca.lcit22fw.madt.techtoids.android.nota_app'
+    namespace 'com.techtoids.nota'
     compileSdk 33
 
     defaultConfig {
-        applicationId "ca.lcit22fw.madt.techtoids.android.nota_app"
+        applicationId "com.techtoids.nota"
         minSdk 30
         targetSdk 33
         versionCode 1

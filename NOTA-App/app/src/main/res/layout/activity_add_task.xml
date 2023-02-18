@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.AddTaskActivity">
+    tools:context="com.techtoids.nota.ui.AddTaskActivity">
 
     <ScrollView
         android:layout_width="0dp"
@@ -45,7 +45,7 @@
             <!--                app:readMoreTextColor="?colorPrimary"-->
             <!--                app:readMoreToggleArea="all" />-->
 
-            <ca.lcit22fw.madt.techtoids.android.nota_app.ui.EditorTextView
+            <com.techtoids.nota.ui.EditorTextView
                 android:id="@+id/task_description"
                 android:layout_width="match_parent"
                 android:layout_height="250dp" />

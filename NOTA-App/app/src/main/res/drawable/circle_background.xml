@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-	<corners android:topLeftRadius="@dimen/circle_bg_corner_radius"
-        android:topRightRadius="@dimen/circle_bg_corner_radius"
+    <corners
         android:bottomLeftRadius="@dimen/circle_bg_corner_radius"
-        android:bottomRightRadius="@dimen/circle_bg_corner_radius"/>
-	<solid android:color="@color/secondary_color" />
+        android:bottomRightRadius="@dimen/circle_bg_corner_radius"
+        android:topLeftRadius="@dimen/circle_bg_corner_radius"
+        android:topRightRadius="@dimen/circle_bg_corner_radius" />
+    <solid android:color="@color/secondary_color" />
 </shape>
