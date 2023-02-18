@@ -1,4 +1,4 @@
-package com.techtoids.nota.ui;
+package com.techtoids.nota.view.custom;
 
 import android.graphics.Canvas;
 import android.graphics.Color;

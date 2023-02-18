@@ -1,4 +1,4 @@
-package com.techtoids.nota.ui;
+package com.techtoids.nota.view.custom;
 
 
 import android.annotation.SuppressLint;

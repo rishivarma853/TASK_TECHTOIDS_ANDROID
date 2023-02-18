@@ -10,8 +10,8 @@ import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.techtoids.nota.databinding.BoardItemBinding;
 import com.techtoids.nota.model.Board;
-import com.techtoids.nota.ui.AvatarPlaceholder;
-import com.techtoids.nota.ui.BoardViewHolder;
+import com.techtoids.nota.view.custom.AvatarPlaceholder;
+import com.techtoids.nota.view.viewholder.BoardViewHolder;
 
 public class BoardListAdapter extends FirestoreRecyclerAdapter<Board, BoardViewHolder> {
     private final OnItemClickListener onItemClickListener;

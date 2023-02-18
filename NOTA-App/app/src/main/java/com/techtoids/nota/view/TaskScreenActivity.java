@@ -1,4 +1,4 @@
-package com.techtoids.nota.ui;
+package com.techtoids.nota.view;
 
 import android.os.Bundle;
 
@@ -19,6 +19,8 @@ public class TaskScreenActivity extends AppCompatActivity {
         binding.home.setOnClickListener(v -> {
             finish();
         });
+
+
     }
 
 }
