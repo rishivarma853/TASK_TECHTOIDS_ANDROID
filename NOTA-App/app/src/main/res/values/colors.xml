@@ -15,4 +15,10 @@
     <color name="secondary_color">@color/downy</color>
     <color name="teritiary_color">@color/curious_blue</color>
     <color name="quadrary_color">@color/steel_blue</color>
+    <color name="task_todo_foreground">#FF880000</color>
+    <color name="task_todo_background">#FFFFAAAA</color>
+    <color name="task_inprogress_foreground">#FF000088</color>
+    <color name="task_inprogress_background">#FFAAAAFF</color>
+    <color name="task_completed_foreground">#FF008800</color>
+    <color name="task_completed_background">#FFAAFFAA</color>
 </resources>

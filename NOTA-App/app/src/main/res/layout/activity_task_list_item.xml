@@ -40,38 +40,40 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="task_title"
-                android:textColor="@color/black"
-                android:textSize="36sp"
+                android:textColor="@color/primary_color"
+                android:textSize="24sp"
                 android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:layout_margin="2dp">
 
                 <TextView
                     android:id="@+id/task_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:background="#BFD7ED"
-                    android:padding="4sp"
+                    android:background="@color/task_todo_background"
+                    android:padding="6sp"
+                    android:textSize="12sp"
                     android:text="todo"
                     android:textAlignment="center"
                     android:textAllCaps="true"
-                    android:textColor="@color/black" />
+                    android:textColor="@color/task_todo_foreground" />
 
                 <TextView
                     android:id="@+id/task_due"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
-                    android:background="#BFD7ED"
-                    android:padding="4sp"
+                    android:background="@color/secondary_color"
+                    android:padding="6sp"
+                    android:textSize="12sp"
                     android:text="days to due"
                     android:textAlignment="center"
                     android:textAllCaps="true"
-                    android:textColor="@color/black" />
+                    android:textColor="@color/primary_color" />
 
 
             </LinearLayout>
@@ -86,28 +88,30 @@
                     android:id="@+id/subtask_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="2dp"
-                    android:src="@drawable/subtask_icon" />
+                    android:src="@drawable/subtask_icon"
+                    android:layout_gravity="center_vertical"/>
 
                 <TextView
                     android:id="@+id/subtask_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="2dp"
                     android:background="@drawable/circle_background"
                     android:padding="4dp"
-
                     android:text="3"
-                    android:textColor="@color/cardview_dark_background"
+                    android:textColor="@color/primary_color"
                     android:textSize="12sp" />
+
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_margin="2dp"
                     android:padding="2sp"
+                    android:textSize="12sp"
+                    android:layout_marginStart="10dp"
                     android:text="18%"
-                    android:textColor="@color/black" />
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:textColor="@color/primary_color" />
 
 
                 <ProgressBar
@@ -115,7 +119,6 @@
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="280dp"
                     android:layout_height="match_parent"
-                    android:layout_margin="2dp"
                     android:max="100"
                     android:min="0"
                     android:progress="50"
