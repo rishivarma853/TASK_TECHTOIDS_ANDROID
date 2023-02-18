@@ -1,4 +1,4 @@
-package ca.lcit22fw.madt.techtoids.android.nota_app.Models;
+package ca.lcit22fw.madt.techtoids.android.nota_app.model;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -9,10 +9,8 @@ import java.util.UUID;
 
 public class Board {
     private final String boardId = UUID.randomUUID().toString();
-
     private String title;
     private List<ParentTask> tasks = new ArrayList<>();
-
     private String userId;
     private Date updatedAt;
 
@@ -35,7 +33,11 @@ public class Board {
         return this.title;
     }
 
-    public List<ParentTask> getAllTasks() {
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public List<ParentTask> getAllParentTasks() {
         return this.tasks;
     }
 
@@ -43,24 +45,20 @@ public class Board {
         return this.updatedAt;
     }
 
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     public String getUserId() {
         return this.userId;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setTasks(List<ParentTask> tasks) {
-        this.tasks = tasks;
     }
 
     public void setUserId(String userId) {
         this.userId = userId;
     }
 
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
+    public void setTasks(List<ParentTask> tasks) {
+        this.tasks = tasks;
     }
 
     public LatLng getLocation() {
@@ -71,11 +69,11 @@ public class Board {
         this.location = location;
     }
 
-    public void addParentTask(ParentTask task){
+    public void addParentTask(ParentTask task) {
         insertParentTask(tasks.size(), task);
     }
 
-    public void insertParentTask(int position, ParentTask task){
+    public void insertParentTask(int position, ParentTask task) {
         task.setTaskListId(getBoardId());
         tasks.remove(task);
         int index = Math.min(position, tasks.size());
@@ -85,7 +83,7 @@ public class Board {
         refreshOrder();
     }
 
-    private void refreshOrder(){
+    private void refreshOrder() {
         for (int i = 0; i < tasks.size(); i++) {
             ParentTask task = tasks.get(i);
             task.setOrder(i);

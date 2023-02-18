@@ -26,6 +26,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ui.AddTaskActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.TaskDescriptionActivity"
+            android:exported="true">
+
+        </activity>
         <activity
             android:name=".LaunchScreenLoadingActivity"
             android:exported="false">

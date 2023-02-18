@@ -1,9 +1,9 @@
 package ca.lcit22fw.madt.techtoids.android.nota_app;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -21,7 +21,7 @@ public class TaskScreenActivity extends AppCompatActivity {
         binding = ActivityTaskScreenBinding.inflate((getLayoutInflater()));
         setContentView(binding.getRoot());
 
-        if(!isSignedIn()) {
+        if (!isSignedIn()) {
             startSignIn();
             return;
         }
@@ -45,7 +45,7 @@ public class TaskScreenActivity extends AppCompatActivity {
         }
     }
 
-    private FirebaseUser getUser(){
+    private FirebaseUser getUser() {
         return FirebaseAuth.getInstance().getCurrentUser();
     }
 

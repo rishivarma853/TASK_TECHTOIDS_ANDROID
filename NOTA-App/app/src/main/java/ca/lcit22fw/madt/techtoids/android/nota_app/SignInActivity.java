@@ -21,6 +21,25 @@ import ca.lcit22fw.madt.techtoids.android.nota_app.databinding.ActivitySignInBin
 public class SignInActivity extends AppCompatActivity {
     private static final String TAG = "Persistence";
     ActivitySignInBinding binding;
+    private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(new FirebaseAuthUIActivityResultContract(), (result) -> {
+        IdpResponse response = result.getIdpResponse();
+        if (result.getResultCode() == RESULT_OK) {
+            navigateToHome(true);
+        } else {
+            if (response == null) {
+                showSnackbar("Sign in cancelled");
+                return;
+            }
+
+            if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK || response.getError().getErrorCode() == ErrorCodes.PROVIDER_ERROR) {
+                showSnackbar("Network error, Check your internet connection.");
+                return;
+            }
+
+            showSnackbar("Unknown error");
+            Log.d(TAG, "Sign-in error: " + response.getError().getErrorCode());
+        }
+    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,31 +61,10 @@ public class SignInActivity extends AppCompatActivity {
         return auth.getCurrentUser() != null;
     }
 
-
     private void startSignIn() {
         Intent signInIntent = AuthUI.getInstance().createSignInIntentBuilder().setTheme(R.style.Theme_NOTAApp).setAvailableProviders(Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build(), new AuthUI.IdpConfig.EmailBuilder().build())).setLogo(R.mipmap.ic_launcher).build();
         signInLauncher.launch(signInIntent);
     }
-
-    private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(new FirebaseAuthUIActivityResultContract(), (result) -> {
-        IdpResponse response = result.getIdpResponse();
-        if (result.getResultCode() == RESULT_OK) {
-            navigateToHome(true);
-        } else {
-            if (response == null) {
-                showSnackbar("Sign in cancelled");
-                return;
-            }
-
-            if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK || response.getError().getErrorCode() == ErrorCodes.PROVIDER_ERROR) {
-                showSnackbar("Network error, Check your internet connection.");
-                return;
-            }
-
-            showSnackbar("Unknown error");
-            Log.d(TAG, "Sign-in error: " + response.getError().getErrorCode());
-        }
-    });
 
     private void showSnackbar(String message) {
         Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_SHORT).show();

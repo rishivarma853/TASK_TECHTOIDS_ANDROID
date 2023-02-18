@@ -1,8 +1,8 @@
 package ca.lcit22fw.madt.techtoids.android.nota_app;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class LaunchScreenLoadingActivity extends AppCompatActivity {
 

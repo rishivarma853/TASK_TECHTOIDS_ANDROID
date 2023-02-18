@@ -1,4 +1,4 @@
-package ca.lcit22fw.madt.techtoids.android.nota_app.Models;
+package ca.lcit22fw.madt.techtoids.android.nota_app.model;
 
 import static android.content.ContentValues.TAG;
 
@@ -32,7 +32,7 @@ public class BoardList {
     }
 
     public void updateBoard(Board oldBoard, Board newboard) {
-        if(boardList.contains(oldBoard)) {
+        if (boardList.contains(oldBoard)) {
             boardList.set(boardList.indexOf(oldBoard), newboard);
         } else {
             Log.e(TAG, "board Not found");
@@ -51,18 +51,20 @@ public class BoardList {
 //            boardList.set(position, board);
 //        }
     }
+
     public void deleteBoard(Board board) {
         boardList.remove(board);
     }
 
     public Board getBoard(String boardUID) {
-        for(Board board : boardList) {
-            if(Objects.equals(board.getBoardId(), boardUID)){
+        for (Board board : boardList) {
+            if (Objects.equals(board.getBoardId(), boardUID)) {
                 return board;
             }
         }
         return null;
     }
+
     public Board getBoard(int position) {
         return boardList.get(position);
     }

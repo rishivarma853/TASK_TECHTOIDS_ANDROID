@@ -1,4 +1,4 @@
-package ca.lcit22fw.madt.techtoids.android.nota_app.Models;
+package ca.lcit22fw.madt.techtoids.android.nota_app.model;
 
 public class SubTask extends BaseTask {
     private String parentTaskId;
@@ -23,7 +23,6 @@ public class SubTask extends BaseTask {
         this.parentTaskId = parentTaskId;
         onUpdate();
     }
-
 
 
 }

@@ -1,4 +1,4 @@
-package ca.lcit22fw.madt.techtoids.android.nota_app.Models;
+package ca.lcit22fw.madt.techtoids.android.nota_app.model;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -6,9 +6,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class BaseTask {
-    private String taskListId;
     private final String taskId = UUID.randomUUID().toString();
-
+    private String taskListId;
     private int order;
 
     private String title;
@@ -83,7 +82,7 @@ public class BaseTask {
         this.attachmentList = attachmentList;
     }
 
-    public void onUpdate(){
+    public void onUpdate() {
         this.updatedAt = Helper.getUTCDate();
     }
 
