@@ -1,33 +1,25 @@
 package ca.lcit22fw.madt.techtoids.android.nota_app;
 
-import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 
 import java.util.Date;
 
 import ca.lcit22fw.madt.techtoids.android.nota_app.adapter.BoardListAdapter;
 import ca.lcit22fw.madt.techtoids.android.nota_app.databinding.ActivityHomeScreenBinding;
-import ca.lcit22fw.madt.techtoids.android.nota_app.databinding.BoardItemBinding;
+import ca.lcit22fw.madt.techtoids.android.nota_app.databinding.BoardDialogBoxBinding;
 import ca.lcit22fw.madt.techtoids.android.nota_app.model.Board;
-import ca.lcit22fw.madt.techtoids.android.nota_app.ui.BoardViewHolder;
 
 public class HomeScreenActivity extends AppCompatActivity {
 
@@ -52,37 +44,17 @@ public class HomeScreenActivity extends AppCompatActivity {
         }
 
         FirebaseUser user = getUser();
-        System.out.println(user.getUid());
         collectionReference = db.collection("boards");
 
-        query = collectionReference.whereEqualTo("userId", user.getUid()).orderBy("updatedAt", Query.Direction.DESCENDING);
-        FirestoreRecyclerOptions<Board> options = new FirestoreRecyclerOptions.Builder<Board>().setQuery(query, Board.class).setLifecycleOwner(this).build();
+        query = collectionReference.whereEqualTo("userId", user.getUid()).orderBy("updatedAt",
+                Query.Direction.DESCENDING);
+        FirestoreRecyclerOptions<Board> options = new FirestoreRecyclerOptions.Builder<Board>()
+                .setQuery(query, Board.class).setLifecycleOwner(this).build();
         adapter = new BoardListAdapter(options, this::onItemClick);
         binding.boardList.setAdapter(adapter);
 
         binding.fab.setOnClickListener(view -> {
-
-            View mView = getLayoutInflater().inflate(R.layout.alert_input, null);
-            final TextInputLayout input = mView.findViewById(R.id.input);
-
-            new AlertDialog.Builder(HomeScreenActivity.this)
-                    .setView(mView)
-                    .setTitle("Enter new board Name")
-                    .setPositiveButton("ADD", (dialog, whichButton) -> {
-                        String value = String.valueOf(input.getEditText().getText());
-                        Board board = new Board();
-                        board.setTitle(value);
-                        board.setUpdatedAt(new Date());
-                        board.setUserId(user.getUid());
-                        collectionReference.document(board.getBoardId()).set(board)
-                                .addOnSuccessListener(aVoid -> {
-                                    navigateToBoard(board.getBoardId());
-                                })
-                                .addOnFailureListener(e -> Log.w("TAG", "Error writing document", e));
-
-                    })
-                    .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss()).create().show();
-
+            showDialog();
         });
     }
 
@@ -93,6 +65,32 @@ public class HomeScreenActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
+
+    private void showDialog() {
+        Dialog dialog = new Dialog(this, R.style.DialogStyle);
+        BoardDialogBoxBinding boardDialogBoxBinding = BoardDialogBoxBinding.inflate(dialog.getLayoutInflater());
+
+        dialog.setContentView(boardDialogBoxBinding.getRoot());
+
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.bg_window);
+
+        boardDialogBoxBinding.btnClose.setOnClickListener(view -> {
+            dialog.dismiss();
+            String value = String.valueOf(boardDialogBoxBinding.editText.getText());
+            Board board = new Board();
+            board.setTitle(value);
+            board.setUpdatedAt(new Date());
+            FirebaseUser user = getUser();
+            board.setUserId(user.getUid());
+            collectionReference.document(board.getBoardId()).set(board)
+                    .addOnSuccessListener(aVoid -> {
+                        navigateToBoard(board.getBoardId());
+                    })
+                    .addOnFailureListener(e -> Log.w("TAG", "Error writing document", e));
+        });
+
+        dialog.show();
+    }
 
     private boolean isSignedIn() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
