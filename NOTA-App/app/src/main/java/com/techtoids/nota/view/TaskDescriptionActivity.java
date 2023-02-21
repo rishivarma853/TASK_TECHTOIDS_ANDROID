@@ -253,7 +253,7 @@ public class TaskDescriptionActivity extends AppCompatActivity {
         inAnimation.setDuration(200);
         binding.progressBarHolder.setAnimation(inAnimation);
         binding.progressBarHolder.setVisibility(View.VISIBLE);
-        binding.taskHeaderLayout.save.setEnabled(true);
+        binding.taskHeaderLayout.save.setEnabled(false);
     }
 
     public void stopAnimation() {
@@ -261,7 +261,7 @@ public class TaskDescriptionActivity extends AppCompatActivity {
         outAnimation.setDuration(200);
         binding.progressBarHolder.setAnimation(outAnimation);
         binding.progressBarHolder.setVisibility(View.GONE);
-        binding.taskHeaderLayout.save.setEnabled(false);
+        binding.taskHeaderLayout.save.setEnabled(true);
     }
 
     ActivityResultLauncher<Intent> cameraLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {

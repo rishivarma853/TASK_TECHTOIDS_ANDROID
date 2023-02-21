@@ -102,7 +102,7 @@ public class BaseTask implements Cloneable {
     }
 
     public void onUpdate() {
-        this.updatedAt = Helper.getUTCDate();
+        this.updatedAt = new Date();
     }
 
     public Date getDueDate() {

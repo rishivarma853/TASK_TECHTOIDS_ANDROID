@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.techtoids.nota.R;
 import com.techtoids.nota.adapter.OnItemClickListener;
 import com.techtoids.nota.databinding.TaskListItemBinding;
+import com.techtoids.nota.helper.BasicHelper;
 import com.techtoids.nota.model.BaseTask;
-import com.techtoids.nota.model.Helper;
 import com.techtoids.nota.model.TaskStatus;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
     public static void bindViewHolder(TaskViewHolder holder, BaseTask model) {
         holder.binding.taskTitle.setText(model.getTitle());
         int childTaskCount = model.getChildTasks().size();
-        holder.binding.taskDue.setText(Helper.getDaysDue(model.getDueDate()));
+        holder.binding.taskDue.setText(BasicHelper.getDaysDue(model.getDueDate()));
         holder.setTaskStatus(model.getTaskStatus());
         if (childTaskCount > 0) {
             holder.binding.subtaskCount.setText(String.valueOf(childTaskCount));

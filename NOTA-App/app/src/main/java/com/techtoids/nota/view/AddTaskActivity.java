@@ -271,7 +271,7 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
         } else if (taskData.getDueDate().before(new Date())) {
             showDialog("Due date cant be past");
         } else {
-            taskData.setUpdatedAt(BasicHelper.getUTCDate());
+            taskData.setUpdatedAt(new Date());
             boolean isParent = getIntent().getBooleanExtra("isParent", false);
             boolean isNew = getIntent().getBooleanExtra("isNew", false);
             DocumentReference documentReference = FirebaseHelper.getTasksCollection()

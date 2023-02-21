@@ -10,8 +10,8 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.techtoids.nota.databinding.TaskListItemBinding;
+import com.techtoids.nota.helper.BasicHelper;
 import com.techtoids.nota.model.BaseTask;
-import com.techtoids.nota.model.Helper;
 import com.techtoids.nota.view.viewholder.TaskViewHolder;
 
 import java.util.List;
@@ -42,7 +42,7 @@ public class ChildTaskListAdapter extends RecyclerView.Adapter<TaskViewHolder> {
         BaseTask model = taskList.get(position);
         holder.binding.taskTitle.setText(model.getTitle());
         holder.setTaskStatus(model.getTaskStatus());
-        holder.binding.taskDue.setText(Helper.getDaysDue(model.getDueDate()));
+        holder.binding.taskDue.setText(BasicHelper.getDaysDue(model.getDueDate()));
         holder.binding.subtaskIcon.setVisibility(View.GONE);
         holder.binding.subtaskCount.setVisibility(View.GONE);
         holder.binding.taskProgressPercent.setVisibility(View.GONE);

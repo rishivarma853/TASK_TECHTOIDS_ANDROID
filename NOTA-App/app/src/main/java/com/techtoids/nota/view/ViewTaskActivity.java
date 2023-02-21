@@ -34,7 +34,6 @@ import com.techtoids.nota.helper.FileHelper;
 import com.techtoids.nota.helper.FirebaseHelper;
 import com.techtoids.nota.helper.SwipeNDragHelper;
 import com.techtoids.nota.model.BaseTask;
-import com.techtoids.nota.model.Helper;
 import com.techtoids.nota.model.TaskStatus;
 
 import java.text.SimpleDateFormat;
@@ -90,7 +89,7 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
                     Task<Void> updateTask;
                     boolean isParent = getIntent().getBooleanExtra("isParent", false);
                     if (isParent) {
-                        task.setUpdatedAt(Helper.getUTCDate());
+                        task.setUpdatedAt(new Date());
                         updateTask = documentReference.update("taskStatus", taskStatus);
                     } else {
                         updateTask = documentReference.update("childTasks", FieldValue.arrayRemove(task));
@@ -102,7 +101,7 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
                                     updateUI();
                                 } else {
                                     task.setTaskStatus(taskStatus);
-                                    task.setUpdatedAt(Helper.getUTCDate());
+                                    task.setUpdatedAt(new Date());
                                     documentReference.update("childTasks", FieldValue.arrayUnion(task))
                                             .addOnSuccessListener(v -> {
                                                 showSnackbar("Updated progress");
