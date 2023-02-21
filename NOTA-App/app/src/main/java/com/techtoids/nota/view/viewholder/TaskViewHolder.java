@@ -37,6 +37,11 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
         holder.binding.taskTitle.setText(model.getTitle());
         int childTaskCount = model.getChildTasks().size();
         holder.binding.taskDue.setText(BasicHelper.getDaysDue(model.getDueDate()));
+        if (model.getTaskStatus() == TaskStatus.COMPLETED) {
+            holder.binding.taskDue.setVisibility(View.GONE);
+        } else {
+            holder.binding.taskDue.setVisibility(View.VISIBLE);
+        }
         holder.setTaskStatus(model.getTaskStatus());
         if (childTaskCount > 0) {
             holder.binding.subtaskCount.setText(String.valueOf(childTaskCount));

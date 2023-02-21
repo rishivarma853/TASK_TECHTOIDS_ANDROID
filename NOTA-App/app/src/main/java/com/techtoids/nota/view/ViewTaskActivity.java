@@ -90,6 +90,18 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
                     boolean isParent = getIntent().getBooleanExtra("isParent", false);
                     if (isParent) {
                         task.setUpdatedAt(new Date());
+                        if (taskStatus == TaskStatus.COMPLETED) {
+                            int completedSize = task.getChildTasks().stream().filter(t -> t.getTaskStatus() == TaskStatus.COMPLETED).collect(Collectors.toList()).size();
+                            if (completedSize != task.getChildTasks().size()) {
+                                binding.taskStatus.setSelection(task.getTaskStatus().ordinal());
+                                new AlertDialog.Builder(ViewTaskActivity.this)
+                                        .setTitle("Oops")
+                                        .setMessage("Cant change the status to completed as some child tasks are still pending.")
+                                        .setPositiveButton("Ok", null)
+                                        .show();
+                                return;
+                            }
+                        }
                         updateTask = documentReference.update("taskStatus", taskStatus);
                     } else {
                         updateTask = documentReference.update("childTasks", FieldValue.arrayRemove(task));
