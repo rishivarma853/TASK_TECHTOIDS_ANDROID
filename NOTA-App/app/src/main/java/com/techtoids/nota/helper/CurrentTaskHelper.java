@@ -14,7 +14,7 @@ public class CurrentTaskHelper {
         return originalData;
     }
 
-    public void setTaskData(BaseTask taskData)  {
+    public void setTaskData(BaseTask taskData) {
         this.taskData = taskData;
         try {
             this.originalData = (BaseTask) taskData.clone();
@@ -26,7 +26,8 @@ public class CurrentTaskHelper {
 
     public boolean hasChanges() {
         System.out.println(originalData);
-        System.out.println(taskData);;
+        System.out.println(taskData);
+        ;
         return !taskData.equals(originalData);
     }
 }

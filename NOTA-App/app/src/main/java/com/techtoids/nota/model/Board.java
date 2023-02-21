@@ -2,9 +2,7 @@ package com.techtoids.nota.model;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 public class Board {
@@ -52,6 +50,7 @@ public class Board {
     public void setLocation(LatLng location) {
         this.location = location;
     }
+
     @Override
     public String toString() {
         return "Board{" +

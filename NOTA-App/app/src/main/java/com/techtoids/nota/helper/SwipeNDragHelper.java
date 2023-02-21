@@ -40,6 +40,7 @@ public abstract class SwipeNDragHelper extends ItemTouchHelper.SimpleCallback {
     private final GestureDetector gestureDetector;
     private final Map<Integer, List<SwipeUnderlayButton>> buttonBuffer;
     private final Queue<Integer> removeQueue;
+    private final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(this);
     private List<SwipeUnderlayButton> buttonList;
     private final GestureDetector.SimpleOnGestureListener gestureListener = new GestureDetector.SimpleOnGestureListener() {
         @Override
@@ -78,7 +79,6 @@ public abstract class SwipeNDragHelper extends ItemTouchHelper.SimpleCallback {
         }
     };
     private float swipeThreshold = 0.5f;
-    private final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(this);
 
     /**
      * @param context      the context should be passed to be used in swipeHelper class

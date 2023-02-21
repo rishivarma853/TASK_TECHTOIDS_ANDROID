@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class BaseTask implements Cloneable {
+    List<BaseTask> childTasks = new ArrayList<>();
     private String taskId = UUID.randomUUID().toString();
     private String boardId;
     private String userId;
@@ -20,9 +21,11 @@ public class BaseTask implements Cloneable {
     private Date dueDate;
     private ArrayList<String> attachmentList = new ArrayList<>();
     private TaskStatus taskStatus = TaskStatus.TODO;
-    List<BaseTask> childTasks = new ArrayList<>();
     private double latitude;
     private double longitude;
+
+    public BaseTask() {
+    }
 
     public List<BaseTask> getChildTasks() {
         return childTasks;
@@ -30,9 +33,6 @@ public class BaseTask implements Cloneable {
 
     public void setChildTasks(List<BaseTask> childTasks) {
         this.childTasks = childTasks;
-    }
-
-    public BaseTask() {
     }
 
     public String getBoardId() {

@@ -8,10 +8,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 
-import com.firebase.ui.common.ChangeEventType;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.techtoids.nota.databinding.TaskListItemBinding;
 import com.techtoids.nota.model.BaseTask;
 import com.techtoids.nota.view.viewholder.TaskViewHolder;

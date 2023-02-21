@@ -1,7 +1,6 @@
 package com.techtoids.nota.adapter;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -37,7 +36,7 @@ public class BoardSearchAdapter extends RecyclerView.Adapter<BoardViewHolder> {
         return boards.size();
     }
 
-    public Board getItem(int position){
+    public Board getItem(int position) {
         return boards.get(position);
     }
 

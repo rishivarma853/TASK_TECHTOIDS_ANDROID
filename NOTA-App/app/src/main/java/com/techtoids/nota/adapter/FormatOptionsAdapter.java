@@ -6,10 +6,10 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.List;
-
 import com.techtoids.nota.databinding.FormatItemBinding;
 import com.techtoids.nota.model.FormatOption;
+
+import java.util.List;
 
 public class FormatOptionsAdapter extends RecyclerView.Adapter<FormatOptionsAdapter.ViewHolder> {
 

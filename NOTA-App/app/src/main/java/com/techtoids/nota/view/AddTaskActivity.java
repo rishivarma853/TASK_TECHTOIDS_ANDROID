@@ -62,10 +62,43 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
     AlphaAnimation outAnimation;
     StorageReference storageRef = FirebaseStorage.getInstance().getReference().child("attachments");
     AttachmentAdapter adapter;
+    private final ActivityResultLauncher<Intent> documentPickerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if (result.getResultCode() == RESULT_OK) {
+            if (result.getData() == null) return;
+            Uri uri = result.getData().getData();
+            String filename = FileHelper.getNewFileName(this, uri);
+            try {
+                InputStream inputStream = getContentResolver().openInputStream(uri);
+                StorageReference documentRef = storageRef.child(filename);
+                UploadTask uploadTask = documentRef.putStream(inputStream);
+                startAnimation();
+                uploadTask
+                        .continueWithTask(task -> {
+                            if (!task.isSuccessful()) {
+                                throw task.getException();
+                            }
+                            return documentRef.getDownloadUrl();
+                        })
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                Uri downloadUri = task.getResult();
+                                getAttachmentList().add(downloadUri.toString());
+                                System.out.println(getAttachmentList());
+                                adapter.notifyItemInserted(getAttachmentList().size() - 1);
+                            }
+                            stopAnimation();
+                        })
+                        .addOnFailureListener(e -> stopAnimation());
+            } catch (FileNotFoundException e) {
+                stopAnimation();
+                throw new RuntimeException(e);
+            }
+        }
+    });
     Calendar date = Calendar.getInstance();
     Menu menu;
-    private FusedLocationProviderClient fusedLocationClient;
     boolean isFullyVisible = false;
+    private FusedLocationProviderClient fusedLocationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -343,40 +376,6 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
         binding.dueDate.setText(getFormattedDate());
         CurrentTaskHelper.instance.taskData.setDueDate(date.getTime());
     }
-
-    private final ActivityResultLauncher<Intent> documentPickerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-        if (result.getResultCode() == RESULT_OK) {
-            if (result.getData() == null) return;
-            Uri uri = result.getData().getData();
-            String filename = FileHelper.getNewFileName(this, uri);
-            try {
-                InputStream inputStream = getContentResolver().openInputStream(uri);
-                StorageReference documentRef = storageRef.child(filename);
-                UploadTask uploadTask = documentRef.putStream(inputStream);
-                startAnimation();
-                uploadTask
-                        .continueWithTask(task -> {
-                            if (!task.isSuccessful()) {
-                                throw task.getException();
-                            }
-                            return documentRef.getDownloadUrl();
-                        })
-                        .addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                Uri downloadUri = task.getResult();
-                                getAttachmentList().add(downloadUri.toString());
-                                System.out.println(getAttachmentList());
-                                adapter.notifyItemInserted(getAttachmentList().size() - 1);
-                            }
-                            stopAnimation();
-                        })
-                        .addOnFailureListener(e -> stopAnimation());
-            } catch (FileNotFoundException e) {
-                stopAnimation();
-                throw new RuntimeException(e);
-            }
-        }
-    });
 
     private void addDocument() {
         documentPickerLauncher.launch(FileHelper.getSelectDocumentIntent());

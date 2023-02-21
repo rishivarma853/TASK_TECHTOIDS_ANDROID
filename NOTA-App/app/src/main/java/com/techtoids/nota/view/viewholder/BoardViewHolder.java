@@ -7,8 +7,8 @@ import com.techtoids.nota.databinding.BoardItemBinding;
 
 
 public class BoardViewHolder extends RecyclerView.ViewHolder {
-    public BoardItemBinding binding;
     private final OnItemClickListener onItemClickListener;
+    public BoardItemBinding binding;
 
     public BoardViewHolder(BoardItemBinding binding, OnItemClickListener onItemClickListener) {
         super(binding.getRoot());

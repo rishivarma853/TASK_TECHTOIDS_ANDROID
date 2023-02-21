@@ -14,11 +14,10 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
-
-import java.util.Arrays;
-
 import com.techtoids.nota.R;
 import com.techtoids.nota.databinding.ActivitySignInBinding;
+
+import java.util.Arrays;
 
 public class SignInActivity extends AppCompatActivity {
     private static final String TAG = "Persistence";

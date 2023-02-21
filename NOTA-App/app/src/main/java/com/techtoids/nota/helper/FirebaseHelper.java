@@ -7,8 +7,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class FirebaseHelper {
     static FirebaseFirestore db = FirebaseFirestore.getInstance();
-    static CollectionReference boardsCollection =  db.collection("boards");
-    static CollectionReference tasksCollection =  db.collection("tasks");
+    static CollectionReference boardsCollection = db.collection("boards");
+    static CollectionReference tasksCollection = db.collection("tasks");
 
     public static FirebaseFirestore getDb() {
         return db;

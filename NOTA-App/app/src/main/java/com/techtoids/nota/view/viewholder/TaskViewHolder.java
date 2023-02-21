@@ -33,25 +33,7 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
         });
     }
 
-    public void setTaskStatus(TaskStatus taskStatus) {
-        binding.taskStatus.setText(taskStatus.value);
-        switch (taskStatus) {
-            case TODO:
-                binding.taskStatus.setTextColor(ContextCompat.getColor(context, R.color.task_todo_foreground));
-                binding.taskStatus.setBackgroundColor(ContextCompat.getColor(context, R.color.task_todo_background));
-                break;
-            case IN_PROGRESS:
-                binding.taskStatus.setTextColor(ContextCompat.getColor(context, R.color.task_inprogress_foreground));
-                binding.taskStatus.setBackgroundColor(ContextCompat.getColor(context, R.color.task_inprogress_background));
-                break;
-            case COMPLETED:
-                binding.taskStatus.setTextColor(ContextCompat.getColor(context, R.color.task_completed_foreground));
-                binding.taskStatus.setBackgroundColor(ContextCompat.getColor(context, R.color.task_completed_background));
-                break;
-        }
-    }
-
-    public static void bindViewHolder(TaskViewHolder holder, BaseTask model){
+    public static void bindViewHolder(TaskViewHolder holder, BaseTask model) {
         holder.binding.taskTitle.setText(model.getTitle());
         int childTaskCount = model.getChildTasks().size();
         holder.binding.taskDue.setText(Helper.getDaysDue(model.getDueDate()));
@@ -84,5 +66,23 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
             holder.binding.subtaskCount.setVisibility(View.GONE);
         }
 
+    }
+
+    public void setTaskStatus(TaskStatus taskStatus) {
+        binding.taskStatus.setText(taskStatus.value);
+        switch (taskStatus) {
+            case TODO:
+                binding.taskStatus.setTextColor(ContextCompat.getColor(context, R.color.task_todo_foreground));
+                binding.taskStatus.setBackgroundColor(ContextCompat.getColor(context, R.color.task_todo_background));
+                break;
+            case IN_PROGRESS:
+                binding.taskStatus.setTextColor(ContextCompat.getColor(context, R.color.task_inprogress_foreground));
+                binding.taskStatus.setBackgroundColor(ContextCompat.getColor(context, R.color.task_inprogress_background));
+                break;
+            case COMPLETED:
+                binding.taskStatus.setTextColor(ContextCompat.getColor(context, R.color.task_completed_foreground));
+                binding.taskStatus.setBackgroundColor(ContextCompat.getColor(context, R.color.task_completed_background));
+                break;
+        }
     }
 }

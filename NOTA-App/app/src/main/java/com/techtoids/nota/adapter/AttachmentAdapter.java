@@ -24,7 +24,7 @@ public class AttachmentAdapter extends RecyclerView.Adapter<AttachmentAdapter.Vi
         this.onItemClickListener = onItemClickListener;
     }
 
-    public void updateList(List<String> attachments){
+    public void updateList(List<String> attachments) {
         this.attachments = attachments;
         notifyDataSetChanged();
     }

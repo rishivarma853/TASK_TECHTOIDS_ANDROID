@@ -17,8 +17,8 @@ import com.techtoids.nota.view.viewholder.TaskViewHolder;
 import java.util.List;
 
 public class ChildTaskListAdapter extends RecyclerView.Adapter<TaskViewHolder> {
-    private List<BaseTask> taskList;
     private final OnItemClickListener onItemClickListener;
+    private List<BaseTask> taskList;
     private ItemTouchHelper itemTouchHelper;
 
     public ChildTaskListAdapter(List<BaseTask> taskList, OnItemClickListener onItemClickListener) {

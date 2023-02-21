@@ -14,25 +14,25 @@
         <!-- Customize your theme here. -->
     </style>
 
-<!--    <style name="ToolbarTheme" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">-->
-<!--        -->
-<!--        <item name="android:textColorPrimary">@color/white</item>-->
-<!--        <item name="actionMenuTextColor">@android:color/holo_green_light</item>-->
-<!--        &lt;!&ndash; Tints the input fields like checkboxes and text fields &ndash;&gt;-->
-<!--        <item name="colorAccent">@color/cursorAccent</item>-->
-<!--        &lt;!&ndash; Applies to views in their normal state. &ndash;&gt;-->
-<!--        <item name="colorControlNormal">@color/controlNormal</item>-->
-<!--        &lt;!&ndash; Applies to views in their activated state (i.e checked or switches) &ndash;&gt;-->
-<!--        <item name="colorControlActivated">@color/controlActivated</item>-->
-<!--        &lt;!&ndash; Applied to framework control highlights (i.e ripples or list selectors) &ndash;&gt;-->
-<!--        <item name="colorControlHighlight">@color/controlActivated</item>-->
+    <!--    <style name="ToolbarTheme" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">-->
+    <!--        -->
+    <!--        <item name="android:textColorPrimary">@color/white</item>-->
+    <!--        <item name="actionMenuTextColor">@android:color/holo_green_light</item>-->
+    <!--        &lt;!&ndash; Tints the input fields like checkboxes and text fields &ndash;&gt;-->
+    <!--        <item name="colorAccent">@color/cursorAccent</item>-->
+    <!--        &lt;!&ndash; Applies to views in their normal state. &ndash;&gt;-->
+    <!--        <item name="colorControlNormal">@color/controlNormal</item>-->
+    <!--        &lt;!&ndash; Applies to views in their activated state (i.e checked or switches) &ndash;&gt;-->
+    <!--        <item name="colorControlActivated">@color/controlActivated</item>-->
+    <!--        &lt;!&ndash; Applied to framework control highlights (i.e ripples or list selectors) &ndash;&gt;-->
+    <!--        <item name="colorControlHighlight">@color/controlActivated</item>-->
 
-<!--        &lt;!&ndash; Enable these below if you want clicking icons to trigger a ripple effect &ndash;&gt;-->
-<!--        &lt;!&ndash;-->
-<!--        <item name="selectableItemBackground">?android:selectableItemBackground</item>-->
-<!--        <item name="selectableItemBackgroundBorderless">?android:selectableItemBackground</item>-->
-<!--        &ndash;&gt;-->
-<!--    </style>-->
+    <!--        &lt;!&ndash; Enable these below if you want clicking icons to trigger a ripple effect &ndash;&gt;-->
+    <!--        &lt;!&ndash;-->
+    <!--        <item name="selectableItemBackground">?android:selectableItemBackground</item>-->
+    <!--        <item name="selectableItemBackgroundBorderless">?android:selectableItemBackground</item>-->
+    <!--        &ndash;&gt;-->
+    <!--    </style>-->
 
     <style name="DialogStyle" parent="Theme.AppCompat.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
