@@ -1,5 +1,6 @@
 package com.techtoids.nota.view;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Point;
 import android.net.Uri;
@@ -21,6 +22,7 @@ import com.techtoids.nota.adapter.AttachmentAdapter;
 import com.techtoids.nota.adapter.ChildTaskListAdapter;
 import com.techtoids.nota.databinding.ActivityViewTaskBinding;
 import com.techtoids.nota.databinding.AttachmentItemBinding;
+import com.techtoids.nota.helper.CurrentTaskHelper;
 import com.techtoids.nota.helper.FileHelper;
 import com.techtoids.nota.helper.FirebaseHelper;
 import com.techtoids.nota.helper.SwipeNDragHelper;
@@ -162,12 +164,12 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
                         new SwipeUnderlayButton(
                                 ViewTaskActivity.this,
                                 "Edit",
-                                R.drawable.edit,
+                                R.drawable.folder,
                                 30,
                                 0,
                                 ContextCompat.getColor(ViewTaskActivity.this, R.color.warning),
                                 SwipeDirection.LEFT,
-                                ViewTaskActivity.this::onItemEdit
+                                ViewTaskActivity.this::onItemMove
                         )
                 );
             }
@@ -198,10 +200,36 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
         childTaskListAdapter.setItemTouchHelper(swipeNDragHelper.getItemTouchHelper());
     }
 
-    private void onItemEdit(int i) {
+    private void onItemMove(int i) {
+        BaseTask task1 = getChildTaskList().get(i);
+        CurrentTaskHelper.instance.setTaskData(task1);
+        Intent intent = new Intent(ViewTaskActivity.this, MoveTaskActivity.class);
+        intent.putExtra("taskId", task.getTaskId());
+        startActivity(intent);
     }
 
     private void onItemDelete(int i) {
+        BaseTask task1 = getChildTaskList().get(i);
+        String taskId = getIntent().getStringExtra("taskId");
+        new AlertDialog.Builder(this)
+                .setTitle("Delete")
+                .setMessage("Are you sure you want to delete " + task1.getTitle() + "?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    dialog.dismiss();
+                    FirebaseHelper.getTasksCollection().document(taskId).update("childTasks", FieldValue.arrayRemove(task1))
+                            .addOnSuccessListener(unused -> {
+                                showSnackbar("Deleted " + task1.getTitle());
+                                getChildTaskList().remove(i);
+                                childTaskListAdapter.notifyItemRemoved(i);
+                                updateUI();
+                            })
+                            .addOnFailureListener(e -> {
+                                showSnackbar("Error deleting " + task1.getTitle());
+                            });
+                })
+                .setNegativeButton("No", null)
+                .show();
+
     }
 
 

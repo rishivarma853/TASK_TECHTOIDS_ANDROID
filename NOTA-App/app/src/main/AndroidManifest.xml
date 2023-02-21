@@ -37,6 +37,12 @@
             android:name=".view.TaskDescriptionActivity"
             android:exported="false" />
         <activity
+            android:name=".view.MoveTaskActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.MoveBoardActivity"
+            android:exported="false" />
+        <activity
             android:name=".LaunchScreenLoadingActivity"
             android:exported="false" />
     </application>

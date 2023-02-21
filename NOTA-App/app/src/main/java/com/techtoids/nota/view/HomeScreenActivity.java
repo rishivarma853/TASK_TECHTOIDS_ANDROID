@@ -37,7 +37,7 @@ public class HomeScreenActivity extends AppCompatActivity implements SearchView.
     List<Board> boards;
     List<Board> filteredBoards = new ArrayList<>();
     BoardSearchAdapter boardSearchAdapter = null;
-
+    int sortBy = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +58,22 @@ public class HomeScreenActivity extends AppCompatActivity implements SearchView.
             Board board = new Board();
             board.setUserId(FirebaseHelper.getCurrentUser().getUid());
             showDialog(board, false);
+        });
+        binding.sortMenu.setOnClickListener(v -> {
+            new AlertDialog.Builder(HomeScreenActivity.this)
+                    .setTitle("Sort By")
+                    .setSingleChoiceItems(
+                            new String[]{
+                                    "Title", "Date"
+                            },
+                            sortBy,
+                            (dialog, which) -> {
+                                sortBy = which;
+                                dialog.dismiss();
+                                onFilterUpdate();
+                            }
+                    )
+                    .show();
         });
 
         swipeNDragHelper = new SwipeNDragHelper(this, 150, binding.boardList) {
@@ -264,10 +280,14 @@ public class HomeScreenActivity extends AppCompatActivity implements SearchView.
     public void onFilterUpdate() {
         Query query = FirebaseHelper.getBoardsCollection()
                 .whereEqualTo("userId", FirebaseHelper.getCurrentUser().getUid())
-                .orderBy("title")
+                .orderBy(sortBy == 0 ? "title" : "updatedAt")
                 .orderBy("updatedAt", Query.Direction.DESCENDING);
         FirestoreRecyclerOptions<Board> options = new FirestoreRecyclerOptions.Builder<Board>()
                 .setQuery(query, Board.class).setLifecycleOwner(this).build();
-        adapter.updateOptions(options);
+        if (adapter != null)
+            adapter.stopListening();
+        boards = options.getSnapshots();
+        adapter = new BoardListAdapter(options, this::onItemClick, binding.noRecordsLayout.emptyView);
+        binding.boardList.setAdapter(adapter);
     }
 }

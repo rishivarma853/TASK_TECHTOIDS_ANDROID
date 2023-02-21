@@ -17,10 +17,10 @@ import com.techtoids.nota.R;
 import com.techtoids.nota.adapter.TaskListAdapter;
 import com.techtoids.nota.adapter.TaskSearchAdapter;
 import com.techtoids.nota.databinding.ActivityTaskScreenBinding;
+import com.techtoids.nota.helper.CurrentTaskHelper;
 import com.techtoids.nota.helper.FirebaseHelper;
 import com.techtoids.nota.helper.SwipeNDragHelper;
 import com.techtoids.nota.model.BaseTask;
-import com.techtoids.nota.model.Board;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,12 +83,12 @@ public class TaskScreenActivity extends AppCompatActivity implements SearchView.
                             new SwipeUnderlayButton(
                                     TaskScreenActivity.this,
                                     "Edit",
-                                    R.drawable.edit,
+                                    R.drawable.folder,
                                     30,
                                     0,
                                     ContextCompat.getColor(TaskScreenActivity.this, R.color.warning),
                                     SwipeDirection.LEFT,
-                                    TaskScreenActivity.this::onItemEdit
+                                    TaskScreenActivity.this::onItemMove
                             )
                     );
                 }
@@ -132,7 +132,12 @@ public class TaskScreenActivity extends AppCompatActivity implements SearchView.
         adapter.setItemTouchHelper(swipeNDragHelper.getItemTouchHelper());
     }
 
-    private void onItemEdit(int position) {
+    private void onItemMove(int position) {
+        BaseTask task = adapter.getItem(position);
+        CurrentTaskHelper.instance.setTaskData(task);
+        Intent intent = new Intent(TaskScreenActivity.this, MoveBoardActivity.class);
+        intent.putExtra("boardId", task.getBoardId());
+        startActivity(intent);
     }
 
     private void onItemDelete(int position) {
