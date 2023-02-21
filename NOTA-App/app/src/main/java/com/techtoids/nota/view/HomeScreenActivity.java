@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.view.WindowManager;
 import android.widget.SearchView;
 import android.widget.Toast;
 
@@ -22,6 +24,7 @@ import com.techtoids.nota.adapter.BoardSearchAdapter;
 import com.techtoids.nota.databinding.ActivityHomeScreenBinding;
 import com.techtoids.nota.databinding.BoardDialogBoxBinding;
 import com.techtoids.nota.databinding.UserDialogBoxBinding;
+import com.techtoids.nota.helper.BasicHelper;
 import com.techtoids.nota.helper.FirebaseHelper;
 import com.techtoids.nota.helper.SwipeNDragHelper;
 import com.techtoids.nota.model.Board;
@@ -146,36 +149,40 @@ public class HomeScreenActivity extends AppCompatActivity implements SearchView.
     }
 
     private void showDialog(Board board, boolean edit) {
-        Dialog dialog = new Dialog(this, R.style.DialogStyle);
-        dialog.setCancelable(false);
+        if (BasicHelper.isNetworkAvailable(this)) {
+            Dialog dialog = new Dialog(this, R.style.DialogStyle);
+            dialog.setCancelable(false);
 
-        BoardDialogBoxBinding boardDialogBoxBinding = BoardDialogBoxBinding.inflate(dialog.getLayoutInflater());
 
-        dialog.setContentView(boardDialogBoxBinding.getRoot());
-        if (board.getTitle() != null) {
-            boardDialogBoxBinding.dialogHeader.setText("Update Board Title");
-            boardDialogBoxBinding.input.getEditText().setText(board.getTitle());
+            BoardDialogBoxBinding boardDialogBoxBinding = BoardDialogBoxBinding.inflate(dialog.getLayoutInflater());
+            dialog.setContentView(boardDialogBoxBinding.getRoot());
+            if (board.getTitle() != null) {
+                boardDialogBoxBinding.dialogHeader.setText("Update Board Title");
+                boardDialogBoxBinding.input.getEditText().setText(board.getTitle());
+            }
+            boardDialogBoxBinding.btnClose.setOnClickListener(view -> {
+                dialog.dismiss();
+            });
+            boardDialogBoxBinding.btnYes.setOnClickListener(view -> {
+                String value = String.valueOf(boardDialogBoxBinding.input.getEditText().getText());
+                if (value.isEmpty()) {
+                    Toast.makeText(HomeScreenActivity.this, "Board Name empty", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                board.setTitle(value);
+                board.setUpdatedAt(new Date());
+                if (edit) {
+                    onUpdate(board);
+                } else {
+                    onAdd(board);
+                }
+                dialog.dismiss();
+            });
+
+            resizeDialog(dialog);
+
+            dialog.show();
         }
-        boardDialogBoxBinding.btnClose.setOnClickListener(view -> {
-            dialog.dismiss();
-        });
-        boardDialogBoxBinding.btnYes.setOnClickListener(view -> {
-            String value = String.valueOf(boardDialogBoxBinding.input.getEditText().getText());
-            if (value.isEmpty()) {
-                Toast.makeText(HomeScreenActivity.this, "Board Name empty", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            board.setTitle(value);
-            board.setUpdatedAt(new Date());
-            if (edit) {
-                onUpdate(board);
-            } else {
-                onAdd(board);
-            }
-            dialog.dismiss();
-        });
-
-        dialog.show();
     }
 
     void showUserDialog() {
@@ -206,26 +213,41 @@ public class HomeScreenActivity extends AppCompatActivity implements SearchView.
                     .show();
         });
 
+        resizeDialog(dialog);
+
         dialog.show();
     }
 
+    private void resizeDialog(Dialog dialog){
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+        layoutParams.copyFrom(dialog.getWindow().getAttributes());
+        layoutParams.width = (int) (displayMetrics.widthPixels * 0.85f);
+        dialog.getWindow().setAttributes(layoutParams);
+    }
+
     private void onItemDelete(int position) {
-        Board board = adapter.getItem(position);
-        new AlertDialog.Builder(this)
-                .setTitle("Delete")
-                .setMessage("Are you sure you want to delete " + board.getTitle() + "? This will delete all inner tasks.")
-                .setPositiveButton("Yes", (dialog, which) -> {
-                    dialog.dismiss();
-                    onDelete(board);
-                })
-                .setNegativeButton("No", null)
-                .show();
+        if (BasicHelper.isNetworkAvailable(this)) {
+            Board board = adapter.getItem(position);
+            new AlertDialog.Builder(this)
+                    .setTitle("Delete")
+                    .setMessage("Are you sure you want to delete " + board.getTitle() + "? This will delete all inner tasks.")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        dialog.dismiss();
+                        onDelete(board);
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+        }
 
     }
 
     private void onItemEdit(int position) {
-        Board board = adapter.getItem(position);
-        showDialog(board, true);
+        if (BasicHelper.isNetworkAvailable(this)) {
+            Board board = adapter.getItem(position);
+            showDialog(board, true);
+        }
     }
 
     public void onItemClick(int position) {
@@ -234,25 +256,29 @@ public class HomeScreenActivity extends AppCompatActivity implements SearchView.
     }
 
     public void onDelete(Board board) {
-        FirebaseHelper
-                .getBoardsCollection()
-                .document(board.getBoardId())
-                .delete()
-                .addOnSuccessListener(aVoid -> showSnackbar("Deleted " + board.getTitle()))
-                .addOnFailureListener(e -> {
-                    showSnackbar("Error deleting board");
-                });
+        if (BasicHelper.isNetworkAvailable(this)) {
+            FirebaseHelper
+                    .getBoardsCollection()
+                    .document(board.getBoardId())
+                    .delete()
+                    .addOnSuccessListener(aVoid -> showSnackbar("Deleted " + board.getTitle()))
+                    .addOnFailureListener(e -> {
+                        showSnackbar("Error deleting board");
+                    });
+        }
     }
 
     private void onUpdate(Board board) {
-        FirebaseHelper
-                .getBoardsCollection()
-                .document(board.getBoardId())
-                .update("title", board.getTitle())
-                .addOnSuccessListener(aVoid -> showSnackbar("Updated " + board.getTitle()))
-                .addOnFailureListener(e -> {
-                    showSnackbar("Error updating board");
-                });
+        if (BasicHelper.isNetworkAvailable(this)) {
+            FirebaseHelper
+                    .getBoardsCollection()
+                    .document(board.getBoardId())
+                    .update("title", board.getTitle())
+                    .addOnSuccessListener(aVoid -> showSnackbar("Updated " + board.getTitle()))
+                    .addOnFailureListener(e -> {
+                        showSnackbar("Error updating board");
+                    });
+        }
     }
 
     private void onAdd(Board board) {
@@ -314,16 +340,18 @@ public class HomeScreenActivity extends AppCompatActivity implements SearchView.
     }
 
     public void onFilterUpdate() {
-        Query query = FirebaseHelper.getBoardsCollection()
-                .whereEqualTo("userId", FirebaseHelper.getCurrentUser().getUid())
-                .orderBy(sortBy == 0 ? "title" : "updatedAt")
-                .orderBy("updatedAt", Query.Direction.DESCENDING);
-        FirestoreRecyclerOptions<Board> options = new FirestoreRecyclerOptions.Builder<Board>()
-                .setQuery(query, Board.class).setLifecycleOwner(this).build();
-        if (adapter != null)
-            adapter.stopListening();
-        boards = options.getSnapshots();
-        adapter = new BoardListAdapter(options, this::onItemClick, binding.noRecordsLayout.emptyView);
-        binding.boardList.setAdapter(adapter);
+        if (BasicHelper.isNetworkAvailable(this)) {
+            Query query = FirebaseHelper.getBoardsCollection()
+                    .whereEqualTo("userId", FirebaseHelper.getCurrentUser().getUid())
+                    .orderBy(sortBy == 0 ? "title" : "updatedAt")
+                    .orderBy("updatedAt", Query.Direction.DESCENDING);
+            FirestoreRecyclerOptions<Board> options = new FirestoreRecyclerOptions.Builder<Board>()
+                    .setQuery(query, Board.class).setLifecycleOwner(this).build();
+            if (adapter != null)
+                adapter.stopListening();
+            boards = options.getSnapshots();
+            adapter = new BoardListAdapter(options, this::onItemClick, binding.noRecordsLayout.emptyView);
+            binding.boardList.setAdapter(adapter);
+        }
     }
 }

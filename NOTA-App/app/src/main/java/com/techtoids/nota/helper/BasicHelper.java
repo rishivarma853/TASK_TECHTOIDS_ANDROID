@@ -1,5 +1,10 @@
 package com.techtoids.nota.helper;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
+import android.widget.Toast;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -36,5 +41,16 @@ public class BasicHelper {
         }
         return "Due soon";
 
+    }
+
+    public static boolean isNetworkAvailable(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkCapabilities networkCapabilities = connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork());
+        if (networkCapabilities != null) {
+            return true;
+        } else {
+            Toast.makeText(context, "No network detected", Toast.LENGTH_SHORT).show();
+            return false;
+        }
     }
 }

@@ -1,13 +1,17 @@
 package com.techtoids.nota.view;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,6 +33,7 @@ import com.techtoids.nota.adapter.AttachmentAdapter;
 import com.techtoids.nota.adapter.ChildTaskListAdapter;
 import com.techtoids.nota.databinding.ActivityViewTaskBinding;
 import com.techtoids.nota.databinding.AttachmentItemBinding;
+import com.techtoids.nota.helper.BasicHelper;
 import com.techtoids.nota.helper.CurrentTaskHelper;
 import com.techtoids.nota.helper.FileHelper;
 import com.techtoids.nota.helper.FirebaseHelper;
@@ -64,6 +69,7 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
 
         binding.taskDescription.setMaximumHeight(getMaxDescriptionHeight());
         binding.taskDescription.disable();
+        binding.taskDescription.setOnTouchListener((v, event) -> true);
         attachmentAdapter = new AttachmentAdapter(getAttachmentList(), this);
         binding.attachmentList.setAdapter(attachmentAdapter);
 
@@ -151,15 +157,17 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
         });
 
         binding.fabLayout.fab.setOnClickListener(v -> {
-            String taskId = getIntent().getStringExtra("taskId");
-            String boardId = getIntent().getStringExtra("boardId");
-            Intent intent = new Intent(ViewTaskActivity.this, AddTaskActivity.class);
-            intent.putExtra("boardId", boardId);
-            intent.putExtra("taskId", taskId);
-            intent.putExtra("isNew", true);
-            int lastOrder = getChildTaskList().size() > 0 ? getChildTaskList().get(getChildTaskList().size() - 1).getOrder() + 1 : 0;
-            intent.putExtra("order", lastOrder);
-            startActivity(intent);
+            if (BasicHelper.isNetworkAvailable(this)) {
+                String taskId = getIntent().getStringExtra("taskId");
+                String boardId = getIntent().getStringExtra("boardId");
+                Intent intent = new Intent(ViewTaskActivity.this, AddTaskActivity.class);
+                intent.putExtra("boardId", boardId);
+                intent.putExtra("taskId", taskId);
+                intent.putExtra("isNew", true);
+                int lastOrder = getChildTaskList().size() > 0 ? getChildTaskList().get(getChildTaskList().size() - 1).getOrder() + 1 : 0;
+                intent.putExtra("order", lastOrder);
+                startActivity(intent);
+            }
         });
 
 
@@ -193,25 +201,27 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
             }
 
             public void onDrag(int oldPosition, int newPosition) {
-                System.out.println("called " + oldPosition + " - " + newPosition);
-                List<BaseTask> childTaskList = getChildTaskList();
-                childTaskList.add(newPosition, childTaskList.remove(oldPosition));
-                childTaskListAdapter.notifyItemMoved(oldPosition, newPosition);
-                for (int i = 0; i < childTaskListAdapter.getItemCount(); i++) {
-                    BaseTask task = childTaskList.get(i);
-                    System.out.println(task);
-                    if (task.getOrder() != i)
-                        task.setOrder(i);
+                if (BasicHelper.isNetworkAvailable(ViewTaskActivity.this)) {
+                    System.out.println("called " + oldPosition + " - " + newPosition);
+                    List<BaseTask> childTaskList = getChildTaskList();
+                    childTaskList.add(newPosition, childTaskList.remove(oldPosition));
+                    childTaskListAdapter.notifyItemMoved(oldPosition, newPosition);
+                    for (int i = 0; i < childTaskListAdapter.getItemCount(); i++) {
+                        BaseTask task = childTaskList.get(i);
+                        System.out.println(task);
+                        if (task.getOrder() != i)
+                            task.setOrder(i);
+                    }
+                    FirebaseHelper.getTasksCollection()
+                            .document(task.getTaskId())
+                            .update("childTasks", getChildTaskList())
+                            .addOnSuccessListener(unused -> {
+                                showSnackbar("Updated Order");
+                            })
+                            .addOnFailureListener(e -> {
+                                showSnackbar("Error Updating");
+                            });
                 }
-                FirebaseHelper.getTasksCollection()
-                        .document(task.getTaskId())
-                        .update("childTasks", getChildTaskList())
-                        .addOnSuccessListener(unused -> {
-                            showSnackbar("Updated Order");
-                        })
-                        .addOnFailureListener(e -> {
-                            showSnackbar("Error Updating");
-                        });
             }
         };
 
@@ -219,35 +229,38 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
     }
 
     private void onItemMove(int i) {
-        BaseTask task1 = getChildTaskList().get(i);
-        CurrentTaskHelper.instance.setTaskData(task1);
-        Intent intent = new Intent(ViewTaskActivity.this, MoveTaskActivity.class);
-        intent.putExtra("taskId", task.getTaskId());
-        startActivity(intent);
+        if (BasicHelper.isNetworkAvailable(this)) {
+            BaseTask task1 = getChildTaskList().get(i);
+            CurrentTaskHelper.instance.setTaskData(task1);
+            Intent intent = new Intent(ViewTaskActivity.this, MoveTaskActivity.class);
+            intent.putExtra("taskId", task.getTaskId());
+            startActivity(intent);
+        }
     }
 
     private void onItemDelete(int i) {
-        BaseTask task1 = getChildTaskList().get(i);
-        String taskId = getIntent().getStringExtra("taskId");
-        new AlertDialog.Builder(this)
-                .setTitle("Delete")
-                .setMessage("Are you sure you want to delete " + task1.getTitle() + "?")
-                .setPositiveButton("Yes", (dialog, which) -> {
-                    dialog.dismiss();
-                    FirebaseHelper.getTasksCollection().document(taskId).update("childTasks", FieldValue.arrayRemove(task1))
-                            .addOnSuccessListener(unused -> {
-                                showSnackbar("Deleted " + task1.getTitle());
-                                getChildTaskList().remove(i);
-                                childTaskListAdapter.notifyItemRemoved(i);
-                                updateUI();
-                            })
-                            .addOnFailureListener(e -> {
-                                showSnackbar("Error deleting " + task1.getTitle());
-                            });
-                })
-                .setNegativeButton("No", null)
-                .show();
-
+        if (BasicHelper.isNetworkAvailable(this)) {
+            BaseTask task1 = getChildTaskList().get(i);
+            String taskId = getIntent().getStringExtra("taskId");
+            new AlertDialog.Builder(this)
+                    .setTitle("Delete")
+                    .setMessage("Are you sure you want to delete " + task1.getTitle() + "?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        dialog.dismiss();
+                        FirebaseHelper.getTasksCollection().document(taskId).update("childTasks", FieldValue.arrayRemove(task1))
+                                .addOnSuccessListener(unused -> {
+                                    showSnackbar("Deleted " + task1.getTitle());
+                                    getChildTaskList().remove(i);
+                                    childTaskListAdapter.notifyItemRemoved(i);
+                                    updateUI();
+                                })
+                                .addOnFailureListener(e -> {
+                                    showSnackbar("Error deleting " + task1.getTitle());
+                                });
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+        }
     }
 
 
@@ -324,7 +337,8 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
                             binding.mapLayout.setVisibility(View.VISIBLE);
                             SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                                     .findFragmentById(R.id.map);
-                            mapFragment.getMapAsync(this);
+                            if (mapFragment != null)
+                                mapFragment.getMapAsync(this);
                         } else {
                             binding.mapLayout.setVisibility(View.GONE);
                         }
@@ -358,17 +372,19 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
     }
 
     private void onEditClick() {
-        Intent intent = new Intent(ViewTaskActivity.this, AddTaskActivity.class);
-        String taskId = getIntent().getStringExtra("taskId");
-        String boardId = getIntent().getStringExtra("boardId");
-        String baseTaskId = getIntent().getStringExtra("baseTaskId");
-        boolean isParent = getIntent().getBooleanExtra("isParent", false);
-        intent.putExtra("boardId", boardId);
-        if (baseTaskId != null)
-            intent.putExtra("baseTaskId", baseTaskId);
-        intent.putExtra("taskId", taskId);
-        intent.putExtra("isParent", isParent);
-        startActivity(intent);
+        if (BasicHelper.isNetworkAvailable(this)) {
+            Intent intent = new Intent(ViewTaskActivity.this, AddTaskActivity.class);
+            String taskId = getIntent().getStringExtra("taskId");
+            String boardId = getIntent().getStringExtra("boardId");
+            String baseTaskId = getIntent().getStringExtra("baseTaskId");
+            boolean isParent = getIntent().getBooleanExtra("isParent", false);
+            intent.putExtra("boardId", boardId);
+            if (baseTaskId != null)
+                intent.putExtra("baseTaskId", baseTaskId);
+            intent.putExtra("taskId", taskId);
+            intent.putExtra("isParent", isParent);
+            startActivity(intent);
+        }
     }
 
     private void onBackPress() {
@@ -383,7 +399,12 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
 
     private void openDocument(Uri documentUri) {
         if (documentUri != null) {
-            startActivity(FileHelper.getOpenDocumentIntent(documentUri));
+            Intent intent = FileHelper.getOpenDocumentIntent(documentUri);
+            if (intent.resolveActivity(getPackageManager()) == null) {
+                Toast.makeText(this, "No app available to open this attachment", Toast.LENGTH_SHORT).show();
+            } else {
+                startActivity(intent);
+            }
         }
     }
 

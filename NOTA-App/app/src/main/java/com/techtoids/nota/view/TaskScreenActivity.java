@@ -17,6 +17,7 @@ import com.techtoids.nota.R;
 import com.techtoids.nota.adapter.TaskListAdapter;
 import com.techtoids.nota.adapter.TaskSearchAdapter;
 import com.techtoids.nota.databinding.ActivityTaskScreenBinding;
+import com.techtoids.nota.helper.BasicHelper;
 import com.techtoids.nota.helper.CurrentTaskHelper;
 import com.techtoids.nota.helper.FirebaseHelper;
 import com.techtoids.nota.helper.SwipeNDragHelper;
@@ -54,13 +55,15 @@ public class TaskScreenActivity extends AppCompatActivity implements SearchView.
                     .orderBy("order");
 
             binding.fabLayout.fab.setOnClickListener(v -> {
-                Intent intent = new Intent(TaskScreenActivity.this, AddTaskActivity.class);
-                intent.putExtra("boardId", boardId);
-                intent.putExtra("isParent", true);
-                intent.putExtra("isNew", true);
-                int lastOrder = adapter.getItemCount() > 0 ? adapter.getItem(adapter.getItemCount() - 1).getOrder() + 1 : 0;
-                intent.putExtra("order", lastOrder);
-                startActivity(intent);
+                if (BasicHelper.isNetworkAvailable(this)) {
+                    Intent intent = new Intent(TaskScreenActivity.this, AddTaskActivity.class);
+                    intent.putExtra("boardId", boardId);
+                    intent.putExtra("isParent", true);
+                    intent.putExtra("isNew", true);
+                    int lastOrder = adapter.getItemCount() > 0 ? adapter.getItem(adapter.getItemCount() - 1).getOrder() + 1 : 0;
+                    intent.putExtra("order", lastOrder);
+                    startActivity(intent);
+                }
             });
 
 
@@ -94,26 +97,28 @@ public class TaskScreenActivity extends AppCompatActivity implements SearchView.
                 }
 
                 public void onDrag(int oldPosition, int newPosition) {
-                    System.out.println("called " + oldPosition + " - " + newPosition);
+                    if (BasicHelper.isNetworkAvailable(TaskScreenActivity.this)) {
+                        System.out.println("called " + oldPosition + " - " + newPosition);
 //                    Collections.swap(adapter.getSnapshots(), oldPosition, newPosition);
-                    adapter.notifyItemMoved(oldPosition, newPosition);
-                    WriteBatch batch = FirebaseHelper.getDb().batch();
-                    for (int i = 0; i < adapter.getItemCount(); i++) {
-                        BaseTask task = adapter.getItem(i);
-                        int position = i;
-                        if (i == oldPosition) position = newPosition;
-                        else if (i == newPosition) position = oldPosition;
-                        if (task.getOrder() != position)
-                            batch.update(FirebaseHelper.getTasksCollection().document(task.getTaskId()), "order", position);
+                        adapter.notifyItemMoved(oldPosition, newPosition);
+                        WriteBatch batch = FirebaseHelper.getDb().batch();
+                        for (int i = 0; i < adapter.getItemCount(); i++) {
+                            BaseTask task = adapter.getItem(i);
+                            int position = i;
+                            if (i == oldPosition) position = newPosition;
+                            else if (i == newPosition) position = oldPosition;
+                            if (task.getOrder() != position)
+                                batch.update(FirebaseHelper.getTasksCollection().document(task.getTaskId()), "order", position);
+                        }
+                        batch.commit()
+                                .addOnSuccessListener(unused -> {
+                                    showSnackbar("Updated Order");
+                                    reattachRecyclerView();
+                                })
+                                .addOnFailureListener(e -> {
+                                    showSnackbar("Error Updating");
+                                });
                     }
-                    batch.commit()
-                            .addOnSuccessListener(unused -> {
-                                showSnackbar("Updated Order");
-                                reattachRecyclerView();
-                            })
-                            .addOnFailureListener(e -> {
-                                showSnackbar("Error Updating");
-                            });
                 }
             };
 
@@ -133,30 +138,34 @@ public class TaskScreenActivity extends AppCompatActivity implements SearchView.
     }
 
     private void onItemMove(int position) {
-        BaseTask task = adapter.getItem(position);
-        CurrentTaskHelper.instance.setTaskData(task);
-        Intent intent = new Intent(TaskScreenActivity.this, MoveBoardActivity.class);
-        intent.putExtra("boardId", task.getBoardId());
-        startActivity(intent);
+        if (BasicHelper.isNetworkAvailable(this)) {
+            BaseTask task = adapter.getItem(position);
+            CurrentTaskHelper.instance.setTaskData(task);
+            Intent intent = new Intent(TaskScreenActivity.this, MoveBoardActivity.class);
+            intent.putExtra("boardId", task.getBoardId());
+            startActivity(intent);
+        }
     }
 
     private void onItemDelete(int position) {
-        BaseTask task = adapter.getItem(position);
-        new AlertDialog.Builder(this)
-                .setTitle("Delete")
-                .setMessage("Are you sure you want to delete " + task.getTitle() + "? This will delete all inner tasks.")
-                .setPositiveButton("Yes", (dialog, which) -> {
-                    dialog.dismiss();
-                    FirebaseHelper
-                            .getTasksCollection()
-                            .document(task.getTaskId())
-                            .delete()
-                            .addOnSuccessListener(aVoid -> showSnackbar("Deleted " + task.getTitle()))
-                            .addOnFailureListener(e -> showSnackbar("Error deleting board"));
-                    reattachRecyclerView();
-                })
-                .setNegativeButton("No", null)
-                .show();
+        if (BasicHelper.isNetworkAvailable(this)) {
+            BaseTask task = adapter.getItem(position);
+            new AlertDialog.Builder(this)
+                    .setTitle("Delete")
+                    .setMessage("Are you sure you want to delete " + task.getTitle() + "? This will delete all inner tasks.")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        dialog.dismiss();
+                        FirebaseHelper
+                                .getTasksCollection()
+                                .document(task.getTaskId())
+                                .delete()
+                                .addOnSuccessListener(aVoid -> showSnackbar("Deleted " + task.getTitle()))
+                                .addOnFailureListener(e -> showSnackbar("Error deleting board"));
+                        reattachRecyclerView();
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+        }
     }
 
     @Override

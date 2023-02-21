@@ -9,10 +9,12 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -38,6 +40,7 @@ import com.techtoids.nota.R;
 import com.techtoids.nota.adapter.AttachmentAdapter;
 import com.techtoids.nota.databinding.ActivityAddTaskBinding;
 import com.techtoids.nota.databinding.AttachmentItemBinding;
+import com.techtoids.nota.helper.BasicHelper;
 import com.techtoids.nota.helper.CurrentTaskHelper;
 import com.techtoids.nota.helper.FileHelper;
 import com.techtoids.nota.helper.FirebaseHelper;
@@ -118,7 +121,7 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
         CurrentTaskHelper.instance.taskData.setUserId(FirebaseHelper.getCurrentUser().getUid());
         CurrentTaskHelper.instance.taskData.setOrder(order);
         setLocation();
-        binding.taskHeaderLayout.header.setText((isNew ? "Add" : "Update") + " "+(isParent?"":"Sub ")+"Task");
+        binding.taskHeaderLayout.header.setText((isNew ? "Add" : "Update") + " " + (isParent ? "" : "Sub ") + "Task");
         if (taskId != null && !isNew) {
             System.out.println("called");
             FirebaseHelper.getTasksCollection()
@@ -159,6 +162,13 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
 
         binding.dueDate.setOnClickListener(v -> {
             showDatePicker();
+        });
+        binding.taskDescription.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                Intent intent = new Intent(AddTaskActivity.this, TaskDescriptionActivity.class);
+                startActivity(intent);
+            }
+            return true;
         });
         binding.editDescription.setOnClickListener(v -> {
             Intent intent = new Intent(AddTaskActivity.this, TaskDescriptionActivity.class);
@@ -252,63 +262,69 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
     }
 
     private void onSaveClick() {
-        BaseTask taskData = CurrentTaskHelper.instance.taskData;
-        System.out.println(taskData.getDescription());
-        if (taskData.getTitle() == null || taskData.getTitle().trim().length() == 0) {
-            showDialog("Title cannot be empty");
-        } else if (taskData.getDescription() == null || taskData.getDescription().isEmpty()) {
-            showDialog("Description cannot be empty");
-        } else if (taskData.getDueDate() == null) {
-            showDialog("Due date not selected");
-        } else if (taskData.getDueDate().before(new Date())) {
-            showDialog("Due date cant be past");
-        } else {
-            taskData.setUpdatedAt(new Date());
-            boolean isParent = getIntent().getBooleanExtra("isParent", false);
-            boolean isNew = getIntent().getBooleanExtra("isNew", false);
-            DocumentReference documentReference = FirebaseHelper.getTasksCollection()
-                    .document(taskData.getTaskId());
-            Task<Void> task = null;
-            if (isNew) {
-                if (isParent) {
+        if (BasicHelper.isNetworkAvailable(this)) {
+            BaseTask taskData = CurrentTaskHelper.instance.taskData;
+            System.out.println(taskData.getDescription());
+            if (taskData.getTitle() == null || taskData.getTitle().trim().length() == 0) {
+                showDialog("Title cannot be empty");
+            } else if (taskData.getDescription() == null || taskData.getDescription().isEmpty()) {
+                showDialog("Description cannot be empty");
+            } else if (taskData.getDueDate() == null) {
+                showDialog("Due date not selected");
+            } else if (taskData.getDueDate().before(new Date())) {
+                showDialog("Due date cant be past");
+            } else {
+                taskData.setUpdatedAt(new Date());
+                boolean isParent = getIntent().getBooleanExtra("isParent", false);
+                boolean isNew = getIntent().getBooleanExtra("isNew", false);
+                DocumentReference documentReference = FirebaseHelper.getTasksCollection()
+                        .document(taskData.getTaskId());
+                Task<Void> task = null;
+                if (isNew) {
+                    if (isParent) {
+                        task = documentReference.set(taskData);
+                    } else {
+                        String taskId = getIntent().getStringExtra("taskId");
+                        String baseTaskId = getIntent().getStringExtra("baseTaskId");
+                        documentReference = FirebaseHelper.getTasksCollection().document(baseTaskId == null ? taskId : baseTaskId);
+                        task = documentReference.update("childTasks", FieldValue.arrayUnion(taskData));
+                    }
+                } else if (isParent) {
                     task = documentReference.set(taskData);
                 } else {
                     String taskId = getIntent().getStringExtra("taskId");
                     String baseTaskId = getIntent().getStringExtra("baseTaskId");
                     documentReference = FirebaseHelper.getTasksCollection().document(baseTaskId == null ? taskId : baseTaskId);
-                    task = documentReference.update("childTasks", FieldValue.arrayUnion(taskData));
+                    task = documentReference.update("childTasks", FieldValue.arrayRemove(CurrentTaskHelper.instance.getOriginalData()));
                 }
-            } else if (isParent) {
-                task = documentReference.set(taskData);
-            } else {
-                String taskId = getIntent().getStringExtra("taskId");
-                String baseTaskId = getIntent().getStringExtra("baseTaskId");
-                documentReference = FirebaseHelper.getTasksCollection().document(baseTaskId == null ? taskId : baseTaskId);
-                task = documentReference.update("childTasks", FieldValue.arrayRemove(CurrentTaskHelper.instance.getOriginalData()));
+                DocumentReference finalDocumentReference = documentReference;
+                task
+                        .addOnCompleteListener(task1 -> {
+                            System.out.println(task1.getException());
+                        })
+                        .addOnSuccessListener(aVoid -> {
+                            if (!isParent && !isNew) {
+                                finalDocumentReference
+                                        .update("childTasks", FieldValue.arrayUnion((BaseTask) taskData))
+                                        .addOnSuccessListener(unused -> {
+                                            finish();
+                                            CurrentTaskHelper.instance.setTaskData(null);
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            showSnackbar("Error adding task");
+                                        });
+                            } else {
+                                finish();
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            showSnackbar("Error adding task");
+                        });
             }
-            DocumentReference finalDocumentReference = documentReference;
-            task.addOnSuccessListener(aVoid -> {
-                        if (!isParent && !isNew) {
-                            finalDocumentReference
-                                    .update("childTasks", FieldValue.arrayUnion((BaseTask) taskData))
-                                    .addOnSuccessListener(unused -> {
-                                        finish();
-                                        CurrentTaskHelper.instance.setTaskData(null);
-                                    })
-                                    .addOnFailureListener(e -> {
-                                        showSnackbar("Error adding board");
-                                    });
-                        } else {
-                            finish();
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        showSnackbar("Error adding board");
-                    });
-        }
 
-        updateUI();
-        adapter.notifyDataSetChanged();
+            updateUI();
+            adapter.notifyDataSetChanged();
+        }
     }
 
     private void showDialog(String message) {
@@ -378,7 +394,12 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
 
     private void openDocument(Uri documentUri) {
         if (documentUri != null) {
-            startActivity(FileHelper.getOpenDocumentIntent(documentUri));
+            Intent intent = FileHelper.getOpenDocumentIntent(documentUri);
+            if (intent.resolveActivity(getPackageManager()) == null) {
+                Toast.makeText(this, "No app available to open this document", Toast.LENGTH_SHORT).show();
+            } else {
+                startActivity(intent);
+            }
         }
     }
 

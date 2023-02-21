@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -40,6 +42,7 @@ import com.techtoids.nota.model.FormatOption;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -61,7 +64,7 @@ public class TaskDescriptionActivity extends AppCompatActivity {
                 Uri selectedImageUri = data.getData();
                 Bitmap selectedImageBitmap;
                 try {
-                    selectedImageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
+                    selectedImageBitmap = rectifyImage(selectedImageUri);
                     Uri filepath = saveImage(selectedImageBitmap);
                     if (filepath != null) {
                         uploadImage(filepath);
@@ -125,8 +128,8 @@ public class TaskDescriptionActivity extends AppCompatActivity {
         }));
         formatOptionList.add(new FormatOption(R.drawable.format_bold, () -> binding.taskDescription.setBold()));
         formatOptionList.add(new FormatOption(R.drawable.format_italic, () -> binding.taskDescription.setItalic()));
-        if(checkCameraHardware())
-        formatOptionList.add(new FormatOption(R.drawable.camera, () -> requestCameraPermissions()));
+        if (checkCameraHardware())
+            formatOptionList.add(new FormatOption(R.drawable.camera, () -> requestCameraPermissions()));
         formatOptionList.add(new FormatOption(R.drawable.image, () -> onAddImagePress()));
         formatOptionList.add(new FormatOption(R.drawable.format_align_left, () -> binding.taskDescription.setAlignLeft()));
         formatOptionList.add(new FormatOption(R.drawable.format_align_center, () -> binding.taskDescription.setAlignCenter()));
@@ -185,6 +188,35 @@ public class TaskDescriptionActivity extends AppCompatActivity {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public Bitmap rectifyImage(Uri uri) throws IOException {
+        Bitmap originalBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+        try {
+            InputStream input = getContentResolver().openInputStream(uri);
+            ExifInterface ei = new ExifInterface(input);
+
+            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    return rotateImage(originalBitmap, 90);
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    return rotateImage(originalBitmap, 180);
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    return rotateImage(originalBitmap, 270);
+                default:
+                    return originalBitmap;
+            }
+        } catch (Exception e) {
+            return originalBitmap;
+        }
+    }
+
+    public Bitmap rotateImage(Bitmap source, float angle) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(),
+                matrix, true);
     }
 
     @Override
