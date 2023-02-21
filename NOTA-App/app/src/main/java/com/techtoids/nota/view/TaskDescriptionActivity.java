@@ -1,6 +1,8 @@
 package com.techtoids.nota.view;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
@@ -13,11 +15,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
@@ -40,6 +46,7 @@ import java.util.List;
 
 public class TaskDescriptionActivity extends AppCompatActivity {
 
+    private static final int PERMISSIONS_REQUEST_CAMERA = 1;
     ActivityTaskDescriptionBinding binding;
     List<FormatOption> formatOptionList = new ArrayList<>();
     FormatOptionsAdapter adapter;
@@ -118,6 +125,8 @@ public class TaskDescriptionActivity extends AppCompatActivity {
         }));
         formatOptionList.add(new FormatOption(R.drawable.format_bold, () -> binding.taskDescription.setBold()));
         formatOptionList.add(new FormatOption(R.drawable.format_italic, () -> binding.taskDescription.setItalic()));
+        if(checkCameraHardware())
+        formatOptionList.add(new FormatOption(R.drawable.camera, () -> requestCameraPermissions()));
         formatOptionList.add(new FormatOption(R.drawable.image, () -> onAddImagePress()));
         formatOptionList.add(new FormatOption(R.drawable.format_align_left, () -> binding.taskDescription.setAlignLeft()));
         formatOptionList.add(new FormatOption(R.drawable.format_align_center, () -> binding.taskDescription.setAlignCenter()));
@@ -244,7 +253,7 @@ public class TaskDescriptionActivity extends AppCompatActivity {
         inAnimation.setDuration(200);
         binding.progressBarHolder.setAnimation(inAnimation);
         binding.progressBarHolder.setVisibility(View.VISIBLE);
-//        menu.findItem(R.id.save).setVisible(false);
+        binding.taskHeaderLayout.save.setEnabled(true);
     }
 
     public void stopAnimation() {
@@ -252,6 +261,62 @@ public class TaskDescriptionActivity extends AppCompatActivity {
         outAnimation.setDuration(200);
         binding.progressBarHolder.setAnimation(outAnimation);
         binding.progressBarHolder.setVisibility(View.GONE);
-//        menu.findItem(R.id.save).setVisible(true);
+        binding.taskHeaderLayout.save.setEnabled(false);
+    }
+
+    ActivityResultLauncher<Intent> cameraLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+        @Override
+        public void onActivityResult(ActivityResult result) {
+            if (result.getResultCode() == RESULT_OK) {
+                Intent data = result.getData();
+                System.out.println(data.getExtras().get("data"));
+                System.out.println(data.getData());
+                if (data.getExtras() != null) {
+                    Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+                    Uri filepath = saveImage(thumbnail);
+                    System.out.println(filepath);
+                    if (filepath != null) {
+                        uploadImage(filepath);
+                    }
+                }
+            }
+        }
+    });
+
+    void onPermissionGranted() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        cameraLauncher.launch(intent);
+    }
+
+    private void requestCameraPermissions() {
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+            onPermissionGranted();
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA},
+                    PERMISSIONS_REQUEST_CAMERA);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == PERMISSIONS_REQUEST_CAMERA) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                onPermissionGranted();
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    private boolean checkCameraHardware() {
+        if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
