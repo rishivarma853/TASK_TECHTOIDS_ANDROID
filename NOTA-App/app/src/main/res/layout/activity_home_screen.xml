@@ -26,6 +26,14 @@
             android:gravity="center"
             android:orientation="horizontal">
 
+            <ImageButton
+                android:id="@+id/user"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="8dp"
+                android:backgroundTint="@color/white"
+                android:src="@drawable/profile" />
+
             <SearchView
                 android:id="@+id/search_bar"
                 android:layout_width="wrap_content"
@@ -33,7 +41,8 @@
                 android:layout_weight="1"
                 android:iconifiedByDefault="false"
                 android:queryBackground="@null"
-                android:queryHint="Search" />
+                android:queryHint="Search"
+                android:searchIcon="@null" />
 
             <ImageButton
                 android:id="@+id/sort_menu"

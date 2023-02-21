@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseUser;
@@ -20,6 +21,7 @@ import com.techtoids.nota.adapter.BoardListAdapter;
 import com.techtoids.nota.adapter.BoardSearchAdapter;
 import com.techtoids.nota.databinding.ActivityHomeScreenBinding;
 import com.techtoids.nota.databinding.BoardDialogBoxBinding;
+import com.techtoids.nota.databinding.UserDialogBoxBinding;
 import com.techtoids.nota.helper.FirebaseHelper;
 import com.techtoids.nota.helper.SwipeNDragHelper;
 import com.techtoids.nota.model.Board;
@@ -58,6 +60,9 @@ public class HomeScreenActivity extends AppCompatActivity implements SearchView.
             Board board = new Board();
             board.setUserId(FirebaseHelper.getCurrentUser().getUid());
             showDialog(board, false);
+        });
+        binding.user.setOnClickListener(v -> {
+            showUserDialog();
         });
         binding.sortMenu.setOnClickListener(v -> {
             new AlertDialog.Builder(HomeScreenActivity.this)
@@ -168,6 +173,37 @@ public class HomeScreenActivity extends AppCompatActivity implements SearchView.
                 onAdd(board);
             }
             dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    void showUserDialog() {
+        Dialog dialog = new Dialog(this, R.style.DialogStyle);
+        dialog.setCancelable(false);
+
+        UserDialogBoxBinding userDialogBoxBinding = UserDialogBoxBinding.inflate(dialog.getLayoutInflater());
+
+        dialog.setContentView(userDialogBoxBinding.getRoot());
+        FirebaseUser user = FirebaseHelper.getCurrentUser();
+        userDialogBoxBinding.userName.setText(user.getDisplayName());
+        userDialogBoxBinding.userEmail.setText(user.getEmail());
+        userDialogBoxBinding.btnClose.setOnClickListener(view -> {
+            dialog.dismiss();
+        });
+        userDialogBoxBinding.logout.setOnClickListener(view -> {
+            new AlertDialog.Builder(this)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle("Logout")
+                    .setMessage("Are you sure you want to logout?")
+                    .setPositiveButton("Yes", (dialogInterface, which) -> {
+                        dialog.dismiss();
+                        AuthUI.getInstance()
+                                .signOut(this)
+                                .addOnCompleteListener(task -> startSignIn());
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
         });
 
         dialog.show();
