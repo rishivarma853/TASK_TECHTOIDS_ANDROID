@@ -1,8 +1,10 @@
 package com.techtoids.nota.view;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,9 +16,17 @@ import android.widget.TimePicker;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
+import com.google.android.gms.tasks.CancellationToken;
+import com.google.android.gms.tasks.OnTokenCanceledListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.DocumentReference;
@@ -45,6 +55,7 @@ import java.util.Date;
 import java.util.List;
 
 public class AddTaskActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener, AttachmentAdapter.OnItemClickListener {
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     ActivityAddTaskBinding binding;
     DatePickerDialog datePickerDialog;
     AlphaAnimation inAnimation;
@@ -53,7 +64,7 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
     AttachmentAdapter adapter;
     Calendar date = Calendar.getInstance();
     Menu menu;
-
+    private FusedLocationProviderClient fusedLocationClient;
     boolean isFullyVisible = false;
 
     @Override
@@ -61,6 +72,8 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
         super.onCreate(savedInstanceState);
         binding = ActivityAddTaskBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         String boardId = getIntent().getStringExtra("boardId");
         String taskId = getIntent().getStringExtra("taskId");
         int order = getIntent().getIntExtra("order", 0);
@@ -70,6 +83,7 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
         CurrentTaskHelper.instance.taskData.setBoardId(boardId);
         CurrentTaskHelper.instance.taskData.setUserId(FirebaseHelper.getCurrentUser().getUid());
         CurrentTaskHelper.instance.taskData.setOrder(order);
+        setLocation();
         binding.taskHeaderLayout.header.setText((isNew ? "Add" : "Update") + " Task");
         if (taskId != null && !isNew) {
             System.out.println("called");
@@ -166,6 +180,11 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
             binding.taskDescription.setHtml(description);
     }
 
+    @Override
+    public void onBackPressed() {
+        onBackPress();
+    }
+
     private int getMaxDescriptionHeight() {
         Point size = new Point();
         getDisplay().getRealSize(size);
@@ -193,11 +212,6 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
         binding.editDescription.setVisibility(View.VISIBLE);
         binding.addAttachment.setVisibility(View.VISIBLE);
 
-        if (binding.taskDescription.getCurrentHeight() > binding.taskDescription.getMaximumHeight()) {
-            binding.seeMore.setVisibility(View.VISIBLE);
-        } else {
-            binding.seeMore.setVisibility(View.GONE);
-        }
     }
 
     @Override
@@ -300,7 +314,7 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
     }
 
     public String getFormattedDate() {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy  h:mm a");
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy 'at' hh:mm a");
         return formatter.format(date.getTime());
     }
 
@@ -379,6 +393,7 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
         inAnimation.setDuration(200);
         binding.progressBarHolder.setAnimation(inAnimation);
         binding.progressBarHolder.setVisibility(View.VISIBLE);
+        binding.taskHeaderLayout.save.setEnabled(false);
     }
 
     public void stopAnimation() {
@@ -386,10 +401,62 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
         outAnimation.setDuration(200);
         binding.progressBarHolder.setAnimation(outAnimation);
         binding.progressBarHolder.setVisibility(View.GONE);
+        binding.taskHeaderLayout.save.setEnabled(true);
     }
 
     private void showSnackbar(String message) {
         Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_SHORT).show();
     }
 
+    void onPermissionGranted() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        fusedLocationClient.
+                getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, new CancellationToken() {
+                    @NonNull
+                    @Override
+                    public CancellationToken onCanceledRequested(@NonNull OnTokenCanceledListener onTokenCanceledListener) {
+                        return null;
+                    }
+
+                    @Override
+                    public boolean isCancellationRequested() {
+                        return false;
+                    }
+                })
+                .addOnSuccessListener(this, location -> {
+                    System.out.println(location);
+                    if (location != null) {
+                        CurrentTaskHelper.instance.taskData.setLatitude(location.getLatitude());
+                        CurrentTaskHelper.instance.taskData.setLongitude(location.getLongitude());
+                    }
+                }).addOnFailureListener(e -> {
+                    System.out.println(e.getLocalizedMessage());
+                });
+    }
+
+    private void setLocation() {
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            onPermissionGranted();
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                onPermissionGranted();
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
 }

@@ -48,13 +48,13 @@ public class FileHelper {
     public static Intent getSelectDocumentIntent() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
-                "application/pdf",
-                "application/msword",
-                "application/vnd.ms-excel",
-                "application/vnd.ms-powerpoint",
-                "text/plain"
-        });
+//        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
+//                "application/pdf",
+//                "application/msword",
+//                "application/vnd.ms-excel",
+//                "application/vnd.ms-powerpoint",
+//                "text/plain"
+//        });
         return intent;
     }
 

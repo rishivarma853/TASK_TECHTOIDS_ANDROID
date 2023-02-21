@@ -1,5 +1,7 @@
 package com.techtoids.nota.model;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -7,7 +9,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class BaseTask {
+public class BaseTask implements Cloneable {
     private String taskId = UUID.randomUUID().toString();
     private String boardId;
     private String userId;
@@ -19,9 +21,15 @@ public class BaseTask {
     private ArrayList<String> attachmentList = new ArrayList<>();
     private TaskStatus taskStatus = TaskStatus.TODO;
     List<BaseTask> childTasks = new ArrayList<>();
+    private double latitude;
+    private double longitude;
 
     public List<BaseTask> getChildTasks() {
         return childTasks;
+    }
+
+    public void setChildTasks(List<BaseTask> childTasks) {
+        this.childTasks = childTasks;
     }
 
     public BaseTask() {
@@ -113,6 +121,22 @@ public class BaseTask {
         this.taskStatus = taskStatus;
     }
 
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -142,6 +166,10 @@ public class BaseTask {
                 ", updatedAt=" + updatedAt +
                 ", dueDate=" + dueDate +
                 ", attachmentList=" + attachmentList +
+                ", taskStatus=" + taskStatus +
+                ", childTasks=" + childTasks +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
                 '}';
     }
 
@@ -150,5 +178,23 @@ public class BaseTask {
         return getTitle().toLowerCase().contains(search) ||
                 getDescription().toLowerCase().contains(search) ||
                 childTasks.stream().filter(task -> task.contains(text)).collect(Collectors.toList()).size() > 0;
+    }
+
+    @NonNull
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        Object obj = super.clone();
+
+        BaseTask task = (BaseTask) obj;
+
+        task.setAttachmentList((ArrayList<String>) task.getAttachmentList().clone());
+        task.setChildTasks(task.getChildTasks().stream().map(t -> {
+            try {
+                return (BaseTask) t.clone();
+            } catch (CloneNotSupportedException e) {
+                return t;
+            }
+        }).collect(Collectors.toList()));
+        return task;
     }
 }

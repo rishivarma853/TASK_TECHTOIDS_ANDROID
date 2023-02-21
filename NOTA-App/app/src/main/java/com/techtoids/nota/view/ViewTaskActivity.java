@@ -9,10 +9,17 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.DocumentReference;
@@ -37,7 +44,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ViewTaskActivity extends AppCompatActivity implements AttachmentAdapter.OnItemClickListener {
+public class ViewTaskActivity extends AppCompatActivity implements AttachmentAdapter.OnItemClickListener, OnMapReadyCallback {
     ActivityViewTaskBinding binding;
     AttachmentAdapter attachmentAdapter;
     ChildTaskListAdapter childTaskListAdapter;
@@ -274,6 +281,11 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
         String taskId = getIntent().getStringExtra("taskId");
         String BaseTaskId = getIntent().getStringExtra("BaseTaskId");
         boolean isParent = getIntent().getBooleanExtra("isParent", false);
+        if (isParent) {
+            binding.fabLayout.fab.setVisibility(View.GONE);
+        } else {
+            binding.fabLayout.fab.setVisibility(View.VISIBLE);
+        }
         System.out.println(isParent);
         if (taskId != null) {
             documentReference = FirebaseHelper.getTasksCollection()
@@ -294,20 +306,23 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
                         binding.taskTitle.setText(task.getTitle());
                         binding.taskDescription.setHtml(task.getDescription());
                         binding.dueDate.setText(getFormattedDate(task.getDueDate()));
-
+                        binding.lastUpdated.setText("Last Updated On: " + getFormattedDate(task.getUpdatedAt()));
                         attachmentAdapter.updateList(getAttachmentList());
                         childTaskListAdapter.updateList(getChildTaskList());
-
+                        if (task.getLatitude() > 0 && task.getLatitude() > 0) {
+                            binding.mapLayout.setVisibility(View.VISIBLE);
+                            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                                    .findFragmentById(R.id.map);
+                            mapFragment.getMapAsync(this);
+                        } else {
+                            binding.mapLayout.setVisibility(View.GONE);
+                        }
                         refreshAttachmentHeader();
+
                     });
         }
 
         refreshAttachmentHeader();
-        if (binding.taskDescription.getCurrentHeight() > binding.taskDescription.getMaximumHeight()) {
-            binding.seeMore.setVisibility(View.VISIBLE);
-        } else {
-            binding.seeMore.setVisibility(View.GONE);
-        }
     }
 
     private void refreshAttachmentHeader() {
@@ -346,7 +361,7 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
     }
 
     public String getFormattedDate(Date date) {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/mm/yyyy  h:mm a");
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy 'at' h:mm a");
         return formatter.format(date.getTime());
     }
 
@@ -361,4 +376,16 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
         Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_SHORT).show();
     }
 
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        if (task.getLatitude() > 0 && task.getLatitude() > 0) {
+            googleMap.clear();
+            LatLng latLng = new LatLng(task.getLatitude(), task.getLongitude());
+            googleMap.addMarker(new MarkerOptions()
+                    .position(latLng)
+                    .title(task.getTitle()));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
+
+        }
+    }
 }
