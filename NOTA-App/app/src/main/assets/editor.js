@@ -10,6 +10,10 @@ var destroy = function() {
     $('#summernote').summernote('destroy');
 };
 
+var enableFullscreen = function(){
+    $("#summernote").summernote("fullscreen.toggle");
+}
+
 var undo = function() {
     $('#summernote').summernote('undo');
 };

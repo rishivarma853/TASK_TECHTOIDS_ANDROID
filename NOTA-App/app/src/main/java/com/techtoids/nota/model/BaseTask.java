@@ -2,42 +2,53 @@ package com.techtoids.nota.model;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class BaseTask {
-    private final String taskId = UUID.randomUUID().toString();
-    private String taskListId;
+    private String taskId = UUID.randomUUID().toString();
+    private String boardId;
+    private String userId;
     private int order;
-
     private String title;
     private String description;
-
     private Date updatedAt;
-
     private Date dueDate;
-
     private ArrayList<String> attachmentList = new ArrayList<>();
+    private TaskStatus taskStatus = TaskStatus.TODO;
+    List<BaseTask> childTasks = new ArrayList<>();
+
+    public List<BaseTask> getChildTasks() {
+        return childTasks;
+    }
 
     public BaseTask() {
     }
 
-    public BaseTask(int order, String title, String description) {
-        this.order = order;
-        this.title = title;
-        this.description = description;
+    public String getBoardId() {
+        return boardId;
     }
 
-    public String getTaskListId() {
-        return taskListId;
-    }
-
-    public void setTaskListId(String taskListId) {
-        this.taskListId = taskListId;
+    public void setBoardId(String boardId) {
+        this.boardId = boardId;
     }
 
     public String getTaskId() {
         return taskId;
+    }
+
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public int getOrder() {
@@ -86,12 +97,32 @@ public class BaseTask {
         this.updatedAt = Helper.getUTCDate();
     }
 
+    public Date getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(Date dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public TaskStatus getTaskStatus() {
+        return taskStatus;
+    }
+
+    public void setTaskStatus(TaskStatus taskStatus) {
+        this.taskStatus = taskStatus;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof BaseTask)) return false;
-        BaseTask baseTask = (BaseTask) o;
-        return getTaskId().equals(baseTask.getTaskId());
+        BaseTask taskData = (BaseTask) o;
+        return getTaskId().equals(taskData.getTaskId())
+                && getTitle().equals(taskData.getTitle())
+                && getDescription().equals(taskData.getDescription())
+                && getDueDate().equals(taskData.getDueDate())
+                && getAttachmentList().equals(taskData.getAttachmentList());
     }
 
     @Override
@@ -102,12 +133,22 @@ public class BaseTask {
     @Override
     public String toString() {
         return "BaseTask{" +
-                "taskListId='" + taskListId + '\'' +
-                ", taskId='" + taskId + '\'' +
+                "taskId='" + taskId + '\'' +
+                ", boardId='" + boardId + '\'' +
+                ", userId='" + userId + '\'' +
                 ", order=" + order +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", updatedAt=" + updatedAt +
+                ", dueDate=" + dueDate +
+                ", attachmentList=" + attachmentList +
                 '}';
+    }
+
+    public boolean contains(String text) {
+        String search = text.trim().toLowerCase();
+        return getTitle().toLowerCase().contains(search) ||
+                getDescription().toLowerCase().contains(search) ||
+                childTasks.stream().filter(task -> task.contains(text)).collect(Collectors.toList()).size() > 0;
     }
 }

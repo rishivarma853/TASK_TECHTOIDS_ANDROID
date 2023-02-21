@@ -2,6 +2,7 @@ package com.techtoids.nota.view.custom;
 
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
@@ -30,6 +31,9 @@ public class EditorTextView extends WebView {
     private String content;
     private OnTextChangeListener onTextChangeListener;
     private boolean isContentEmpty;
+    private boolean isFullScreen;
+    private int maximumHeight = 0;
+    private int lastHeight = 0;
 
     public EditorTextView(Context context) {
         super(context);
@@ -131,6 +135,11 @@ public class EditorTextView extends WebView {
 
     public void setHtml(@NonNull String html) {
         exec("javascript:setHtml('" + html + "');");
+    }
+
+    public void enableFullscreen() {
+        isFullScreen = true;
+        exec("javascript:enableFullscreen();");
     }
 
     public void setBold() {
@@ -277,10 +286,34 @@ public class EditorTextView extends WebView {
         evaluateJavascript(trigger, null);
     }
 
+    public int getCurrentHeight() {
+        return lastHeight;
+    }
+
+    public int getMaximumHeight() {
+        return maximumHeight;
+    }
+
+    public void setMaximumHeight(int maximumHeight) {
+        this.maximumHeight = maximumHeight;
+        resize(lastHeight);
+    }
+
     @JavascriptInterface
     public void resize(final float height) {
-//        System.out.println(height);
-//        ((Activity) getContext()).runOnUiThread(() -> setLayoutParams(new ConstraintLayout.LayoutParams(getWidth(), (int) (height * getResources().getDisplayMetrics().density))));
+        this.lastHeight = (int) height;
+        if (!isFullScreen) {
+            ((Activity) getContext()).runOnUiThread(() -> {
+                ViewGroup.LayoutParams layoutParams = getLayoutParams();
+                layoutParams.height = Math.max(
+                        (int) (height * getResources().getDisplayMetrics().density),
+                        getMinimumHeight());
+                if (getMaximumHeight() > -1) {
+                    layoutParams.height = Math.min(layoutParams.height, getMaximumHeight());
+                }
+                setLayoutParams(layoutParams);
+            });
+        }
     }
 
     public interface OnTextChangeListener {

@@ -29,6 +29,10 @@
 			color: #2f2f2f;
 			outline: none;
 		}
+		.note-editor.note-frame .note-editing-area .note-editable[contenteditable=false]{
+		    background-color: #ffffff;
+		}
+
 
 
 
@@ -38,10 +42,10 @@
 <script type="text/javascript">
 			$(document).ready(function () {
 				$("#summernote").summernote({
-					placeholder: "Description",
+					placeholder: "Description...",
 					focus: true,
 					shortcuts: false,
-					minHeight: null,
+					minHeight: 64,
 					maxHeight: null,
 					disableGrammar: true,
 					spellCheck: false,
@@ -57,21 +61,21 @@
 					},
 					callbacks: {
 						onInit: function (e) {
-							$("#summernote").summernote("fullscreen.toggle");
-
 							// Set initial content
 							var code = $("#summernote").summernote("code");
 							EditorTextView.onEditorContentChanged(code, isEmpty());
 
 							const resizeObserver = new ResizeObserver((entries) => {
+							    console.log("entered")
 								if (entries.length > 0) {
 									const editor = entries[0];
+									console.log(editor.contentRect.height)
 									EditorTextView.resize(editor.contentRect?.height);
 								}
 							});
-							resizeObserver.observe(document.querySelector("body > div.note-editor.note-frame.card"));
+							resizeObserver.observe(document.querySelector("body > div.note-editor.note-frame"));
 							document
-								.querySelector("body > div.note-editor.note-frame.card > div.note-statusbar.locked")
+								.querySelector("body > div.note-editor.note-frame.card > div.note-statusbar")
 								.remove();
 						},
 						onChange: function (contents, $editable) {
@@ -80,6 +84,7 @@
 					},
 				});
 			});
+
 
 
 

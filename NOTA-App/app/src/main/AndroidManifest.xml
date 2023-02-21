@@ -13,7 +13,7 @@
         android:theme="@style/Theme.NOTAApp"
         tools:targetApi="31">
         <activity
-            android:name=".ui.SignInActivity"
+            android:name=".view.SignInActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,16 +22,19 @@
         </activity>
 
         <activity
-            android:name=".ui.HomeScreenActivity"
+            android:name=".view.HomeScreenActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.TaskScreenActivity"
+            android:name=".view.TaskScreenActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.AddTaskActivity"
+            android:name=".view.ViewTaskActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.TaskDescriptionActivity"
+            android:name=".view.AddTaskActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.TaskDescriptionActivity"
             android:exported="false" />
         <activity
             android:name=".LaunchScreenLoadingActivity"

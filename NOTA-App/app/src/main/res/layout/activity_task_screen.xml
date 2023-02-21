@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.techtoids.nota.view.TaskScreenActivity">
+    tools:context=".view.TaskScreenActivity">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/header_layout"
@@ -44,23 +44,15 @@
                 android:queryHint="Search"
                 android:searchIcon="@null"
                 app:layout_constrainedHeight="false" />
-
-            <ImageButton
-                android:id="@+id/sort_menu"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_margin="8dp"
-                android:backgroundTint="@color/white"
-                android:src="@drawable/baseline_sort_24" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/taskList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_height="0dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/header_layout"
         tools:listitem="@layout/task_list_item" />
 

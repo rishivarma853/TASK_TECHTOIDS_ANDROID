@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,29 +14,30 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.techtoids.nota.R;
 import com.techtoids.nota.adapter.BoardListAdapter;
+import com.techtoids.nota.adapter.BoardSearchAdapter;
 import com.techtoids.nota.databinding.ActivityHomeScreenBinding;
 import com.techtoids.nota.databinding.BoardDialogBoxBinding;
 import com.techtoids.nota.helper.FirebaseHelper;
-import com.techtoids.nota.helper.SwipeHelper;
+import com.techtoids.nota.helper.SwipeNDragHelper;
 import com.techtoids.nota.model.Board;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class HomeScreenActivity extends AppCompatActivity {
+public class HomeScreenActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     ActivityHomeScreenBinding binding;
-
-    FirebaseFirestore db;
-    CollectionReference collectionReference;
-    Query query;
     BoardListAdapter adapter;
-    SwipeHelper swipeHelper;
+    SwipeNDragHelper swipeNDragHelper;
+    List<Board> boards;
+    List<Board> filteredBoards = new ArrayList<>();
+    BoardSearchAdapter boardSearchAdapter = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,30 +45,22 @@ public class HomeScreenActivity extends AppCompatActivity {
         binding = ActivityHomeScreenBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        db = FirebaseFirestore.getInstance();
-
         if (!FirebaseHelper.isSignedIn()) {
             startSignIn();
             return;
         }
 
-        FirebaseUser user = FirebaseHelper.getCurrentUser();
-        collectionReference = db.collection("boards");
+        reattachRecyclerView();
 
-        query = collectionReference.whereEqualTo("userId", user.getUid()).orderBy("updatedAt",
-                Query.Direction.DESCENDING);
-        FirestoreRecyclerOptions<Board> options = new FirestoreRecyclerOptions.Builder<Board>()
-                .setQuery(query, Board.class).setLifecycleOwner(this).build();
-        adapter = new BoardListAdapter(options, this::onItemClick, binding.noRecordsLayout.emptyView);
-        binding.boardList.setAdapter(adapter);
+        binding.searchBar.setOnQueryTextListener(this);
 
         binding.fabLayout.fab.setOnClickListener(view -> {
             Board board = new Board();
-            board.setUserId(user.getUid());
+            board.setUserId(FirebaseHelper.getCurrentUser().getUid());
             showDialog(board, false);
         });
 
-        swipeHelper = new SwipeHelper(this, 150, binding.boardList) {
+        swipeNDragHelper = new SwipeNDragHelper(this, 150, binding.boardList) {
             @Override
             protected void instantiateSwipeButton(RecyclerView.ViewHolder viewHolder, List<SwipeUnderlayButton> swipeUnderlayButtons) {
                 swipeUnderlayButtons.add(
@@ -94,6 +88,11 @@ public class HomeScreenActivity extends AppCompatActivity {
                         )
                 );
             }
+
+            @Override
+            public void onDrag(int oldPosition, int newPosition) {
+
+            }
         };
     }
 
@@ -113,6 +112,17 @@ public class HomeScreenActivity extends AppCompatActivity {
         }
     }
 
+    private void reattachRecyclerView() {
+        FirebaseUser user = FirebaseHelper.getCurrentUser();
+        Query query = FirebaseHelper.getBoardsCollection().whereEqualTo("userId", user.getUid()).orderBy("updatedAt", Query.Direction.DESCENDING);
+        FirestoreRecyclerOptions<Board> options = new FirestoreRecyclerOptions.Builder<Board>()
+                .setQuery(query, Board.class).setLifecycleOwner(this).build();
+        if (adapter != null)
+            adapter.stopListening();
+        boards = options.getSnapshots();
+        adapter = new BoardListAdapter(options, this::onItemClick, binding.noRecordsLayout.emptyView);
+        binding.boardList.setAdapter(adapter);
+    }
 
     private void showDialog(Board board, boolean edit) {
         Dialog dialog = new Dialog(this, R.style.DialogStyle);
@@ -166,12 +176,14 @@ public class HomeScreenActivity extends AppCompatActivity {
         showDialog(board, true);
     }
 
-    public void onItemClick(Board board) {
+    public void onItemClick(int position) {
+        Board board = adapter.getItem(position);
         navigateToBoard(board.getBoardId());
     }
 
     public void onDelete(Board board) {
-        collectionReference
+        FirebaseHelper
+                .getBoardsCollection()
                 .document(board.getBoardId())
                 .delete()
                 .addOnSuccessListener(aVoid -> showSnackbar("Deleted " + board.getTitle()))
@@ -181,7 +193,8 @@ public class HomeScreenActivity extends AppCompatActivity {
     }
 
     private void onUpdate(Board board) {
-        collectionReference
+        FirebaseHelper
+                .getBoardsCollection()
                 .document(board.getBoardId())
                 .update("title", board.getTitle())
                 .addOnSuccessListener(aVoid -> showSnackbar("Updated " + board.getTitle()))
@@ -191,7 +204,8 @@ public class HomeScreenActivity extends AppCompatActivity {
     }
 
     private void onAdd(Board board) {
-        collectionReference
+        FirebaseHelper
+                .getBoardsCollection()
                 .document(board.getBoardId())
                 .set(board)
                 .addOnSuccessListener(aVoid -> {
@@ -218,5 +232,42 @@ public class HomeScreenActivity extends AppCompatActivity {
 
     private void showSnackbar(String message) {
         Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        onSearchChange(query);
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        onSearchChange(newText);
+        return true;
+    }
+
+    public void onSearchChange(String text) {
+        if (text.length() > 0) {
+            filteredBoards = boards.stream().filter(board -> board.getTitle().toLowerCase().contains(text.trim().toLowerCase())).collect(Collectors.toList());
+            System.out.println(filteredBoards);
+            boardSearchAdapter = new BoardSearchAdapter(filteredBoards, this::onSearchItemClick);
+            binding.boardList.setAdapter(boardSearchAdapter);
+        } else {
+            reattachRecyclerView();
+        }
+    }
+
+    private void onSearchItemClick(int position) {
+        navigateToBoard(boardSearchAdapter.getItem(position).getBoardId());
+    }
+
+    public void onFilterUpdate() {
+        Query query = FirebaseHelper.getBoardsCollection()
+                .whereEqualTo("userId", FirebaseHelper.getCurrentUser().getUid())
+                .orderBy("title")
+                .orderBy("updatedAt", Query.Direction.DESCENDING);
+        FirestoreRecyclerOptions<Board> options = new FirestoreRecyclerOptions.Builder<Board>()
+                .setQuery(query, Board.class).setLifecycleOwner(this).build();
+        adapter.updateOptions(options);
     }
 }

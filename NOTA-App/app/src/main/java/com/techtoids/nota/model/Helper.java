@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 public class Helper {
     public static Date getUTCDate() {
@@ -19,5 +20,27 @@ public class Helper {
         }
 
         return dateToReturn;
+    }
+
+    public static String getDaysDue(Date date) {
+        long dateBeforeInMs = date.getTime();
+        long dateAfterInMs = new Date().getTime();
+
+        long timeDiff = Math.abs(dateAfterInMs - dateBeforeInMs);
+
+        long daysDiff = TimeUnit.DAYS.convert(timeDiff, TimeUnit.MILLISECONDS);
+        if (daysDiff > 0) {
+            return daysDiff + " Days to due";
+        }
+        long hourDiff = TimeUnit.HOURS.convert(timeDiff, TimeUnit.MILLISECONDS);
+        if (hourDiff > 0) {
+            return hourDiff + " Hours to due";
+        }
+        long minuteDiff = TimeUnit.MINUTES.convert(timeDiff, TimeUnit.MILLISECONDS);
+        if (minuteDiff > 0) {
+            return minuteDiff + " Mins to due";
+        }
+        return "Due soon";
+
     }
 }

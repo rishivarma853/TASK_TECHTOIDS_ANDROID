@@ -3,108 +3,106 @@ package com.techtoids.nota.view;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
-import android.database.Cursor;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.OpenableColumns;
 import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
-import android.webkit.MimeTypeMap;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.techtoids.nota.R;
+import com.techtoids.nota.adapter.AttachmentAdapter;
+import com.techtoids.nota.databinding.ActivityAddTaskBinding;
+import com.techtoids.nota.databinding.AttachmentItemBinding;
+import com.techtoids.nota.helper.BasicHelper;
+import com.techtoids.nota.helper.CurrentTaskHelper;
+import com.techtoids.nota.helper.FileHelper;
+import com.techtoids.nota.helper.FirebaseHelper;
+import com.techtoids.nota.helper.SimpleTextWatcher;
+import com.techtoids.nota.model.BaseTask;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import com.techtoids.nota.R;
-import com.techtoids.nota.adapter.AttachmentAdapter;
-import com.techtoids.nota.databinding.ActivityAddTaskBinding;
-import com.techtoids.nota.databinding.AttachmentItemBinding;
-import com.techtoids.nota.helper.CurrentTaskHelper;
-
-public class AddTaskActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
+public class AddTaskActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener, AttachmentAdapter.OnItemClickListener {
     ActivityAddTaskBinding binding;
     DatePickerDialog datePickerDialog;
     AlphaAnimation inAnimation;
     AlphaAnimation outAnimation;
     StorageReference storageRef = FirebaseStorage.getInstance().getReference().child("attachments");
-    List<String> attachments = new ArrayList<>();
     AttachmentAdapter adapter;
-
     Calendar date = Calendar.getInstance();
-    boolean isEditing = true;
     Menu menu;
-    private String content = "";
-    private ActivityResultLauncher<Intent> documentPickerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-        if (result.getResultCode() == RESULT_OK) {
-            Uri uri = result.getData().getData();
-            String originalFilename = getFileName(uri);
 
-            String[] fileArr = originalFilename.split("\\.");
-            String fileExtension = fileArr[fileArr.length - 1];
-
-            String timeStamp = String.valueOf(new Date().getTime());
-            String filename = timeStamp + "." + fileExtension;
-
-            try {
-                InputStream inputStream = getContentResolver().openInputStream(uri);
-                StorageReference documentRef = storageRef.child(filename);
-                UploadTask uploadTask = documentRef.putStream(inputStream);
-                startAnimation();
-                Task<Uri> urlTask = uploadTask.continueWithTask(task -> {
-                    if (!task.isSuccessful()) {
-                        throw task.getException();
-                    }
-
-                    return documentRef.getDownloadUrl();
-                }).addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Uri downloadUri = task.getResult();
-                        attachments.add(downloadUri.toString());
-                        adapter.notifyItemInserted(attachments.size() - 1);
-                    }
-                    stopAnimation();
-                }).addOnFailureListener(e -> stopAnimation());
-            } catch (FileNotFoundException e) {
-                stopAnimation();
-                throw new RuntimeException(e);
-            }
-        }
-    });
+    boolean isFullyVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityAddTaskBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        binding.taskDescription.disable();
-        binding.taskDescription.setHtml("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.");
-
-        binding.editDescription.setOnClickListener(v -> {
+        String boardId = getIntent().getStringExtra("boardId");
+        String taskId = getIntent().getStringExtra("taskId");
+        int order = getIntent().getIntExtra("order", 0);
+        boolean isParent = getIntent().getBooleanExtra("isParent", false);
+        boolean isNew = getIntent().getBooleanExtra("isNew", false);
+        CurrentTaskHelper.instance.setTaskData(new BaseTask());
+        CurrentTaskHelper.instance.taskData.setBoardId(boardId);
+        CurrentTaskHelper.instance.taskData.setUserId(FirebaseHelper.getCurrentUser().getUid());
+        CurrentTaskHelper.instance.taskData.setOrder(order);
+        binding.taskHeaderLayout.header.setText((isNew ? "Add" : "Update") + " Task");
+        if (taskId != null && !isNew) {
             System.out.println("called");
-        });
+            FirebaseHelper.getTasksCollection()
+                    .document(taskId).get()
+                    .addOnSuccessListener(documentSnapshotTask -> {
+                        BaseTask task;
+                        if (isParent) {
+                            task = documentSnapshotTask.toObject(BaseTask.class);
+                        } else {
+                            BaseTask baseTask = documentSnapshotTask.toObject(BaseTask.class);
+                            task = new BaseTask();
+                            task.setBoardId(baseTask.getBoardId());
+                            task.setTaskId(baseTask.getTaskId());
+                            task.setTitle(baseTask.getTitle());
+                            task.setDescription(baseTask.getDescription());
+                            task.setOrder(baseTask.getOrder());
+                            task.setUpdatedAt(baseTask.getUpdatedAt());
+                            task.setDueDate(baseTask.getDueDate());
+                            task.setUserId(baseTask.getUserId());
+                        }
+                        CurrentTaskHelper.instance.setTaskData(task);
+                        adapter.updateList(getAttachmentList());
+                        adapter.shouldShowCancel = true;
+                        updateUI();
+                        System.out.println("found");
+                    }).addOnFailureListener(e -> {
+                        System.out.println(e.getLocalizedMessage());
+                    });
+        }
 
+        binding.taskDescription.setMaximumHeight(getMaxDescriptionHeight());
+        binding.taskDescription.disable();
         Calendar calendar = Calendar.getInstance();
         datePickerDialog = new DatePickerDialog(
                 this,
@@ -113,41 +111,43 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH));
 
-        datePickerDialog
-                .getDatePicker()
-                .setMinDate(
-                        Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant())
-                                .getTime());
+        datePickerDialog.getDatePicker().setMinDate(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()).getTime());
+        binding.dueDate.setText(getFormattedDate());
+
+        adapter = new AttachmentAdapter(getAttachmentList(), this);
+        binding.attachmentList.setAdapter(adapter);
+        adapter.shouldShowCancel = true;
 
         binding.dueDate.setOnClickListener(v -> {
             showDatePicker();
         });
-
         binding.editDescription.setOnClickListener(v -> {
-            CurrentTaskHelper.instance.content = content;
             Intent intent = new Intent(AddTaskActivity.this, TaskDescriptionActivity.class);
             startActivity(intent);
         });
-
         binding.addAttachment.setOnClickListener(v -> {
             addDocument();
         });
 
-        adapter = new AttachmentAdapter(attachments, new AttachmentAdapter.OnItemClickListener() {
+        binding.taskHeaderLayout.home.setOnClickListener(v -> onBackPress());
+        binding.taskHeaderLayout.save.setOnClickListener(v -> onSaveClick());
+        binding.taskTitle.addTextChangedListener(new SimpleTextWatcher() {
             @Override
-            public void onItemClick(int position, AttachmentItemBinding binding) {
-                String attachment = attachments.get(position);
-                openDocument(Uri.parse(attachment));
-            }
-
-            @Override
-            public void onCancelClick(int position, AttachmentItemBinding binding) {
-                attachments.remove(position);
-                adapter.notifyItemRemoved(position);
+            public void onTextChanged(String text) {
+                CurrentTaskHelper.instance.taskData.setTitle(text);
             }
         });
-        binding.attachmentList.setAdapter(adapter);
-        binding.dueDate.setText(getFormattedDate());
+
+        binding.seeMore.setOnClickListener(v -> {
+            if (isFullyVisible) {
+                binding.seeMore.setText("See More");
+                binding.taskDescription.setMaximumHeight(getMaxDescriptionHeight());
+            } else {
+                binding.seeMore.setText("See Less");
+                binding.taskDescription.setMaximumHeight(-1);
+            }
+            isFullyVisible = !isFullyVisible;
+        });
     }
 
     @Override
@@ -161,122 +161,146 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
     protected void onResume() {
         super.onResume();
 
-        content = CurrentTaskHelper.instance.content;
-        System.out.println(content);
-        binding.taskDescription.setHtml(content);
+        String description = CurrentTaskHelper.instance.taskData.getDescription();
+        if (description != null)
+            binding.taskDescription.setHtml(description);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        this.menu = menu;
-        inflater.inflate(R.menu.add_task_menu, menu);
-        updateUI();
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPress();
-                return true;
-            case R.id.edit:
-                onSaveClick();
-                return true;
-        }
-        return false;
+    private int getMaxDescriptionHeight() {
+        Point size = new Point();
+        getDisplay().getRealSize(size);
+        return size.y / 3;
     }
 
     private String getContent() {
         return binding.taskDescription.getHtml().trim();
     }
 
-    public void updateUI() {
-        if (isEditing) {
-            if (menu != null)
-                menu.findItem(R.id.edit).setTitle("Save");
-            binding.taskTitle.setEnabled(true);
-            binding.taskTitle.setTextColor(getResources().getColor(R.color.black));
-            binding.editDescription.setVisibility(View.VISIBLE);
-            binding.addAttachment.setVisibility(View.VISIBLE);
-        } else {
-            binding.taskTitle.setEnabled(false);
-            binding.taskTitle.setTextColor(getResources().getColor(R.color.black));
-            binding.editDescription.setVisibility(View.GONE);
-            binding.addAttachment.setVisibility(View.GONE);
-            if (menu != null)
-                menu.findItem(R.id.edit).setTitle("Edit");
-        }
+    private List<String> getAttachmentList() {
+        return CurrentTaskHelper.instance.taskData.getAttachmentList();
+    }
 
-        if (attachments.size() == 0 && !isEditing) {
-            binding.attachmentHeader.setVisibility(View.GONE);
+    public void updateUI() {
+        System.out.println(CurrentTaskHelper.instance.taskData);
+        binding.taskTitle.setText(CurrentTaskHelper.instance.taskData.getTitle());
+        String description = CurrentTaskHelper.instance.taskData.getDescription();
+        if (description != null)
+            binding.taskDescription.setHtml(description);
+        if (menu != null)
+            menu.findItem(R.id.edit).setTitle("Save");
+        binding.taskTitle.setEnabled(true);
+        binding.taskTitle.setTextColor(getResources().getColor(R.color.black));
+        binding.editDescription.setVisibility(View.VISIBLE);
+        binding.addAttachment.setVisibility(View.VISIBLE);
+
+        if (binding.taskDescription.getCurrentHeight() > binding.taskDescription.getMaximumHeight()) {
+            binding.seeMore.setVisibility(View.VISIBLE);
         } else {
-            binding.attachmentHeader.setVisibility(View.VISIBLE);
+            binding.seeMore.setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    public void onItemClick(int position, AttachmentItemBinding binding) {
+        String attachment = getAttachmentList().get(position);
+        openDocument(Uri.parse(attachment));
+    }
+
+    @Override
+    public void onCancelClick(int position, AttachmentItemBinding binding) {
+        getAttachmentList().remove(position);
+        adapter.notifyItemRemoved(position);
     }
 
     private void onSaveClick() {
-        if (isEditing) {
-            if (binding.taskTitle.getText().toString().trim().length() == 0) {
-                new AlertDialog.Builder(this)
-                        .setTitle("Oops")
-                        .setMessage("Title cannot be empty")
-                        .setPositiveButton("Ok", null)
-                        .show();
-            } else if (binding.taskDescription.isEmpty()) {
-                new AlertDialog.Builder(this)
-                        .setTitle("Oops")
-                        .setMessage("Description cannot be empty")
-                        .setPositiveButton("Ok", null)
-                        .show();
-            } else if (date.getTime().before(new Date())) {
-                new AlertDialog.Builder(this)
-                        .setTitle("Oops")
-                        .setMessage("Due date cant be past")
-                        .setPositiveButton("Ok", null)
-                        .show();
-            } else {
-                isEditing = false;
-                CurrentTaskHelper.instance.content = content;
-                finish();
-            }
+        BaseTask taskData = CurrentTaskHelper.instance.taskData;
+        System.out.println(taskData.getDescription());
+        if (taskData.getTitle() == null || taskData.getTitle().trim().length() == 0) {
+            showDialog("Title cannot be empty");
+        } else if (taskData.getDescription() == null || taskData.getDescription().isEmpty()) {
+            showDialog("Description cannot be empty");
+        } else if (taskData.getDueDate() == null) {
+            showDialog("Due date not selected");
+        } else if (taskData.getDueDate().before(new Date())) {
+            showDialog("Due date cant be past");
         } else {
-            isEditing = true;
+            taskData.setUpdatedAt(BasicHelper.getUTCDate());
+            boolean isParent = getIntent().getBooleanExtra("isParent", false);
+            boolean isNew = getIntent().getBooleanExtra("isNew", false);
+            DocumentReference documentReference = FirebaseHelper.getTasksCollection()
+                    .document(taskData.getTaskId());
+            Task<Void> task = null;
+            if (isNew) {
+                if (isParent) {
+                    task = documentReference.set(taskData);
+                } else {
+                    String taskId = getIntent().getStringExtra("taskId");
+                    documentReference = FirebaseHelper.getTasksCollection().document(taskId);
+                    task = documentReference.update("childTasks", FieldValue.arrayUnion((BaseTask) taskData));
+                }
+            } else if (isParent) {
+                task = documentReference.set(taskData);
+            } else {
+                String taskId = getIntent().getStringExtra("taskId");
+                documentReference = FirebaseHelper.getTasksCollection().document(taskId);
+                task = documentReference.update("childTasks", FieldValue.arrayRemove((BaseTask) taskData));
+            }
+            DocumentReference finalDocumentReference = documentReference;
+            task.addOnSuccessListener(aVoid -> {
+                        if (!isParent && !isNew) {
+                            finalDocumentReference
+                                    .update("childTasks", FieldValue.arrayUnion((BaseTask) taskData))
+                                    .addOnSuccessListener(unused -> {
+                                        finish();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        showSnackbar("Error adding board");
+                                    });
+                        } else {
+                            finish();
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        showSnackbar("Error adding board");
+                    });
         }
-        updateUI();
 
-        adapter.shouldShowCancel = isEditing;
+        updateUI();
         adapter.notifyDataSetChanged();
     }
 
-    private void onBackPress() {
-        if (isEditing) {
-            String content = getContent();
-            if (!content.equals(CurrentTaskHelper.instance.content)) {
-                new AlertDialog.Builder(this)
-                        .setTitle("Changes Detected")
-                        .setMessage("Do you want to discard changes and go back?")
-                        .setPositiveButton("Yes", (dialog, which) -> {
-                            System.out.println("yes");
-                            finish();
-                        })
-                        .setNegativeButton("No", null)
-                        .show();
-                return;
-            }
-        }
-        finish();
+    private void showDialog(String message) {
+        new AlertDialog.Builder(this)
+                .setTitle("Oops")
+                .setMessage(message)
+                .setPositiveButton("Ok", null)
+                .show();
+    }
 
+    private void onBackPress() {
+        if (CurrentTaskHelper.instance.hasChanges()) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Changes Detected")
+                    .setMessage("Do you want to discard changes and go back?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        System.out.println("yes");
+                        finish();
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+            return;
+        }
+
+        finish();
     }
 
     private void showDatePicker() {
-        if (!datePickerDialog.isShowing() && isEditing)
+        if (!datePickerDialog.isShowing())
             datePickerDialog.show();
     }
 
     public String getFormattedDate() {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/mm/yyyy  h:mm a");
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy  h:mm a");
         return formatter.format(date.getTime());
     }
 
@@ -303,36 +327,51 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
         date.set(Calendar.MINUTE, minute);
 
         binding.dueDate.setText(getFormattedDate());
+        CurrentTaskHelper.instance.taskData.setDueDate(date.getTime());
     }
 
-    private String getFileName(Uri uri) {
-        String result = null;
-        if (uri.getScheme().equals("content")) {
-            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
-                if (cursor != null && cursor.moveToFirst()) {
-                    int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                    result = cursor.getString(nameIndex);
-                }
+    private final ActivityResultLauncher<Intent> documentPickerLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if (result.getResultCode() == RESULT_OK) {
+            if (result.getData() == null) return;
+            Uri uri = result.getData().getData();
+            String filename = FileHelper.getNewFileName(this, uri);
+            try {
+                InputStream inputStream = getContentResolver().openInputStream(uri);
+                StorageReference documentRef = storageRef.child(filename);
+                UploadTask uploadTask = documentRef.putStream(inputStream);
+                startAnimation();
+                uploadTask
+                        .continueWithTask(task -> {
+                            if (!task.isSuccessful()) {
+                                throw task.getException();
+                            }
+                            return documentRef.getDownloadUrl();
+                        })
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                Uri downloadUri = task.getResult();
+                                getAttachmentList().add(downloadUri.toString());
+                                System.out.println(getAttachmentList());
+                                adapter.notifyItemInserted(getAttachmentList().size() - 1);
+                            }
+                            stopAnimation();
+                        })
+                        .addOnFailureListener(e -> stopAnimation());
+            } catch (FileNotFoundException e) {
+                stopAnimation();
+                throw new RuntimeException(e);
             }
         }
-        if (result == null) {
-            result = uri.getLastPathSegment();
-        }
-        return result;
-    }
+    });
 
     private void addDocument() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("*/*");
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
-                "application/pdf",
-                "application/msword",
-                "application/vnd.ms-excel",
-                "application/vnd.ms-powerpoint",
-                "text/plain"
-        });
+        documentPickerLauncher.launch(FileHelper.getSelectDocumentIntent());
+    }
 
-        documentPickerLauncher.launch(intent);
+    private void openDocument(Uri documentUri) {
+        if (documentUri != null) {
+            startActivity(FileHelper.getOpenDocumentIntent(documentUri));
+        }
     }
 
     public void startAnimation() {
@@ -349,21 +388,8 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
         binding.progressBarHolder.setVisibility(View.GONE);
     }
 
-    private void openDocument(Uri mDocumentUri) {
-        if (mDocumentUri != null) {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(mDocumentUri, getMimeTypeFromUri(mDocumentUri));
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-        }
+    private void showSnackbar(String message) {
+        Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_SHORT).show();
     }
 
-    private String getMimeTypeFromUri(Uri uri) {
-        String type = null;
-        String extension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
-        if (extension != null) {
-            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
-        }
-        return type;
-    }
 }

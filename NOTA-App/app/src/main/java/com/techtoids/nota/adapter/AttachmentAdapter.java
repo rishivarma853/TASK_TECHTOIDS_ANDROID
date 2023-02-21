@@ -24,6 +24,11 @@ public class AttachmentAdapter extends RecyclerView.Adapter<AttachmentAdapter.Vi
         this.onItemClickListener = onItemClickListener;
     }
 
+    public void updateList(List<String> attachments){
+        this.attachments = attachments;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -33,6 +38,7 @@ public class AttachmentAdapter extends RecyclerView.Adapter<AttachmentAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String attachment = attachments.get(position);
+        System.out.println(attachment);
         if (shouldShowCancel) {
             holder.binding.cancel.setVisibility(View.VISIBLE);
         } else {

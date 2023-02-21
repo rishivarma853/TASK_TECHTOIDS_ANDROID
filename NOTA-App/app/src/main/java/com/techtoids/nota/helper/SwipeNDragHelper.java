@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * You need to call the constructor of the class and override the abstract method "instantiateSwipeButton"
  * in this method you pass the recyclerView viewHolder and the list of buttons you want to have
  */
-public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
+public abstract class SwipeNDragHelper extends ItemTouchHelper.SimpleCallback {
 
     private final int buttonWidth;
     private final RecyclerView recyclerView;
@@ -78,13 +78,14 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
         }
     };
     private float swipeThreshold = 0.5f;
+    private final ItemTouchHelper itemTouchHelper = new ItemTouchHelper(this);
 
     /**
      * @param context      the context should be passed to be used in swipeHelper class
      * @param buttonWidth  the width of buttons
      * @param recyclerView the instance of recyclerView in the app
      */
-    public SwipeHelper(Context context, int buttonWidth, RecyclerView recyclerView) {
+    public SwipeNDragHelper(Context context, int buttonWidth, RecyclerView recyclerView) {
         super(0, ItemTouchHelper.LEFT);
         this.buttonWidth = buttonWidth;
         this.recyclerView = recyclerView;
@@ -105,7 +106,7 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
         attachSwipe();
     }
 
-    /*public SwipeHelper(int dragDirs, int swipeDirs) {
+    /*public SwipeNDragHelper(int dragDirs, int swipeDirs) {
         super(dragDirs, swipeDirs);
     }*/
 
@@ -119,19 +120,41 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
     }
 
     private void attachSwipe() {
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(this);
         itemTouchHelper.attachToRecyclerView(recyclerView);
+    }
+
+    public ItemTouchHelper getItemTouchHelper() {
+        return itemTouchHelper;
+    }
+
+    @Override
+    public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+        return makeMovementFlags(
+                ItemTouchHelper.UP | ItemTouchHelper.DOWN,
+                ItemTouchHelper.START
+        );
+    }
+
+    @Override
+    public boolean isItemViewSwipeEnabled() {
+        return true;
+    }
+
+    @Override
+    public boolean isLongPressDragEnabled() {
+        return false;
     }
 
     // Override methods
     @Override
     public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-        return false;
+        onDrag(viewHolder.getBindingAdapterPosition(), target.getBindingAdapterPosition());
+        return true;
     }
 
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-        int position = viewHolder.getAdapterPosition();
+        int position = viewHolder.getBindingAdapterPosition();
         if (swipePosition != position)
             removeQueue.add(swipePosition);
         swipePosition = position;
@@ -223,6 +246,8 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
      * @param buffer     list of buttons
      */
     protected abstract void instantiateSwipeButton(RecyclerView.ViewHolder viewHolder, List<SwipeUnderlayButton> buffer);
+
+    public abstract void onDrag(int oldPosition, int newPosition);
 
     protected enum SwipeDirection {
         LEFT, RIGHT
@@ -321,6 +346,5 @@ public abstract class SwipeHelper extends ItemTouchHelper.SimpleCallback {
             d.draw(canvas);
             return bitmap;
         }
-
     }
 }

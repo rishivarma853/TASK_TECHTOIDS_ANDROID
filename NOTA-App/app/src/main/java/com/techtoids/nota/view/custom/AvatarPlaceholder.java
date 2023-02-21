@@ -12,7 +12,7 @@ import android.graphics.drawable.Drawable;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 
-import com.techtoids.nota.helper.StringUtils;
+import com.techtoids.nota.helper.BasicHelper;
 
 public class AvatarPlaceholder extends Drawable {
     public static final String DEFAULT_PLACEHOLDER_STRING = "-";
@@ -102,15 +102,15 @@ public class AvatarPlaceholder extends Drawable {
     }
 
     private String resolveStringWhenNoName(String stringWhenNoName) {
-        return StringUtils.isNotNullOrEmpty(stringWhenNoName) ? stringWhenNoName : DEFAULT_PLACEHOLDER_STRING;
+        return BasicHelper.isNotNullOrEmpty(stringWhenNoName) ? stringWhenNoName : DEFAULT_PLACEHOLDER_STRING;
     }
 
     private String convertNameToAvatarText(String name) {
-        return StringUtils.isNotNullOrEmpty(name) ? name.substring(0, 1).toUpperCase() : defaultString;
+        return BasicHelper.isNotNullOrEmpty(name) ? name.substring(0, 1).toUpperCase() : defaultString;
     }
 
     private String convertStringToColor(String text) {
-        return StringUtils.isNullOrEmpty(text) ? DEFAULT_PLACEHOLDER_COLOR : String.format(COLOR_FORMAT, (0xFFFFFF & text.hashCode()));
+        return BasicHelper.isNullOrEmpty(text) ? DEFAULT_PLACEHOLDER_COLOR : String.format(COLOR_FORMAT, (0xFFFFFF & text.hashCode()));
     }
 
     private float calculateTextSize() {

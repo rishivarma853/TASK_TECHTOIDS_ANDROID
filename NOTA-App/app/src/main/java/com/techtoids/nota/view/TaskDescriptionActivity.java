@@ -25,6 +25,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.techtoids.nota.R;
+import com.techtoids.nota.adapter.FormatOptionsAdapter;
+import com.techtoids.nota.databinding.ActivityTaskDescriptionBinding;
+import com.techtoids.nota.helper.CurrentTaskHelper;
+import com.techtoids.nota.model.FormatOption;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -32,12 +37,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import com.techtoids.nota.R;
-import com.techtoids.nota.adapter.FormatOptionsAdapter;
-import com.techtoids.nota.databinding.ActivityTaskDescriptionBinding;
-import com.techtoids.nota.helper.CurrentTaskHelper;
-import com.techtoids.nota.model.FormatOption;
 
 public class TaskDescriptionActivity extends AppCompatActivity {
 
@@ -64,7 +63,6 @@ public class TaskDescriptionActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
-
         }
     });
 
@@ -75,15 +73,22 @@ public class TaskDescriptionActivity extends AppCompatActivity {
 
         setContentView(binding.getRoot());
 
-        binding.taskDescription.setHtml(CurrentTaskHelper.instance.content);
+        binding.taskDescription.enableFullscreen();
+        String description = CurrentTaskHelper.instance.taskData.getDescription();
+        if (description != null) {
+            binding.taskHeaderLayout.header.setText("Update Description");
+            binding.taskDescription.setHtml(description);
+        } else {
+            binding.taskHeaderLayout.header.setText("Add Description");
+        }
         binding.taskDescription.requestFocus();
 
         setupData();
         adapter = new FormatOptionsAdapter(formatOptionList);
         binding.formatToolbar.setAdapter(adapter);
 
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        binding.taskHeaderLayout.home.setOnClickListener(v -> onBackPress());
+        binding.taskHeaderLayout.save.setOnClickListener(v -> onSaveClick());
     }
 
     private void setupData() {
@@ -212,14 +217,14 @@ public class TaskDescriptionActivity extends AppCompatActivity {
                     .setPositiveButton("Ok", null)
                     .show();
         } else {
-            CurrentTaskHelper.instance.content = content;
+            CurrentTaskHelper.instance.taskData.setDescription(content);
             finish();
         }
     }
 
     private void onBackPress() {
         String content = getContent();
-        if (!content.equals(CurrentTaskHelper.instance.content)) {
+        if (!content.equals(CurrentTaskHelper.instance.taskData.getDescription())) {
             new AlertDialog.Builder(this)
                     .setTitle("Changes Detected")
                     .setMessage("Do you want to discard changes and go back?")
@@ -239,7 +244,7 @@ public class TaskDescriptionActivity extends AppCompatActivity {
         inAnimation.setDuration(200);
         binding.progressBarHolder.setAnimation(inAnimation);
         binding.progressBarHolder.setVisibility(View.VISIBLE);
-        menu.findItem(R.id.save).setVisible(false);
+//        menu.findItem(R.id.save).setVisible(false);
     }
 
     public void stopAnimation() {
@@ -247,6 +252,6 @@ public class TaskDescriptionActivity extends AppCompatActivity {
         outAnimation.setDuration(200);
         binding.progressBarHolder.setAnimation(outAnimation);
         binding.progressBarHolder.setVisibility(View.GONE);
-        menu.findItem(R.id.save).setVisible(true);
+//        menu.findItem(R.id.save).setVisible(true);
     }
 }
