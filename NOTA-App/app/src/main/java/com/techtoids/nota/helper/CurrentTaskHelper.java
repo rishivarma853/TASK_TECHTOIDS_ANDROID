@@ -16,18 +16,21 @@ public class CurrentTaskHelper {
 
     public void setTaskData(BaseTask taskData) {
         this.taskData = taskData;
-        try {
-            this.originalData = (BaseTask) taskData.clone();
-        } catch (CloneNotSupportedException e) {
-            System.out.println("error");
-            this.originalData = taskData;
+        if (taskData != null) {
+            try {
+                this.originalData = (BaseTask) taskData.clone();
+            } catch (CloneNotSupportedException e) {
+                System.out.println("error");
+                this.originalData = taskData;
+            }
+        } else {
+            this.originalData = null;
         }
     }
 
     public boolean hasChanges() {
         System.out.println(originalData);
         System.out.println(taskData);
-        ;
         return !taskData.equals(originalData);
     }
 }

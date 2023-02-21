@@ -6,6 +6,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.WriteBatch;
@@ -29,6 +30,7 @@ public class MoveTaskActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         String taskId = getIntent().getStringExtra("taskId");
         FirebaseHelper.getTasksCollection()
+                .whereEqualTo("userId", FirebaseHelper.getCurrentUser().getUid())
                 .whereNotEqualTo("taskId", taskId)
                 .get()
                 .addOnCompleteListener(task -> {

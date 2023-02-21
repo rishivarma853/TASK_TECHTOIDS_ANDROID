@@ -28,6 +28,7 @@ public class MoveBoardActivity extends AppCompatActivity {
         String boardId = getIntent().getStringExtra("boardId");
         FirebaseHelper.getBoardsCollection()
                 .whereNotEqualTo("boardId", boardId)
+                .whereEqualTo("userId", FirebaseHelper.getCurrentUser().getUid())
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {

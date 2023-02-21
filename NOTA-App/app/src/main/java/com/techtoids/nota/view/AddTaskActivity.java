@@ -38,7 +38,6 @@ import com.techtoids.nota.R;
 import com.techtoids.nota.adapter.AttachmentAdapter;
 import com.techtoids.nota.databinding.ActivityAddTaskBinding;
 import com.techtoids.nota.databinding.AttachmentItemBinding;
-import com.techtoids.nota.helper.BasicHelper;
 import com.techtoids.nota.helper.CurrentTaskHelper;
 import com.techtoids.nota.helper.FileHelper;
 import com.techtoids.nota.helper.FirebaseHelper;
@@ -53,6 +52,7 @@ import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class AddTaskActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener, AttachmentAdapter.OnItemClickListener {
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -109,6 +109,7 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         String boardId = getIntent().getStringExtra("boardId");
         String taskId = getIntent().getStringExtra("taskId");
+        String baseTaskId = getIntent().getStringExtra("baseTaskId");
         int order = getIntent().getIntExtra("order", 0);
         boolean isParent = getIntent().getBooleanExtra("isParent", false);
         boolean isNew = getIntent().getBooleanExtra("isNew", false);
@@ -117,26 +118,17 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
         CurrentTaskHelper.instance.taskData.setUserId(FirebaseHelper.getCurrentUser().getUid());
         CurrentTaskHelper.instance.taskData.setOrder(order);
         setLocation();
-        binding.taskHeaderLayout.header.setText((isNew ? "Add" : "Update") + " Task");
+        binding.taskHeaderLayout.header.setText((isNew ? "Add" : "Update") + " "+(isParent?"":"Sub ")+"Task");
         if (taskId != null && !isNew) {
             System.out.println("called");
             FirebaseHelper.getTasksCollection()
-                    .document(taskId).get()
+                    .document(baseTaskId == null ? taskId : baseTaskId).get()
                     .addOnSuccessListener(documentSnapshotTask -> {
-                        BaseTask task;
-                        if (isParent) {
-                            task = documentSnapshotTask.toObject(BaseTask.class);
-                        } else {
-                            BaseTask baseTask = documentSnapshotTask.toObject(BaseTask.class);
-                            task = new BaseTask();
-                            task.setBoardId(baseTask.getBoardId());
-                            task.setTaskId(baseTask.getTaskId());
-                            task.setTitle(baseTask.getTitle());
-                            task.setDescription(baseTask.getDescription());
-                            task.setOrder(baseTask.getOrder());
-                            task.setUpdatedAt(baseTask.getUpdatedAt());
-                            task.setDueDate(baseTask.getDueDate());
-                            task.setUserId(baseTask.getUserId());
+                        BaseTask task = documentSnapshotTask.toObject(BaseTask.class);
+                        if (!isParent) {
+                            task = task.getChildTasks().stream()
+                                    .filter(temp -> temp.getTaskId().equals(taskId))
+                                    .collect(Collectors.toList()).get(0);
                         }
                         CurrentTaskHelper.instance.setTaskData(task);
                         adapter.updateList(getAttachmentList());
@@ -282,15 +274,17 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
                     task = documentReference.set(taskData);
                 } else {
                     String taskId = getIntent().getStringExtra("taskId");
-                    documentReference = FirebaseHelper.getTasksCollection().document(taskId);
-                    task = documentReference.update("childTasks", FieldValue.arrayUnion((BaseTask) taskData));
+                    String baseTaskId = getIntent().getStringExtra("baseTaskId");
+                    documentReference = FirebaseHelper.getTasksCollection().document(baseTaskId == null ? taskId : baseTaskId);
+                    task = documentReference.update("childTasks", FieldValue.arrayUnion(taskData));
                 }
             } else if (isParent) {
                 task = documentReference.set(taskData);
             } else {
                 String taskId = getIntent().getStringExtra("taskId");
-                documentReference = FirebaseHelper.getTasksCollection().document(taskId);
-                task = documentReference.update("childTasks", FieldValue.arrayRemove((BaseTask) taskData));
+                String baseTaskId = getIntent().getStringExtra("baseTaskId");
+                documentReference = FirebaseHelper.getTasksCollection().document(baseTaskId == null ? taskId : baseTaskId);
+                task = documentReference.update("childTasks", FieldValue.arrayRemove(CurrentTaskHelper.instance.getOriginalData()));
             }
             DocumentReference finalDocumentReference = documentReference;
             task.addOnSuccessListener(aVoid -> {
@@ -299,6 +293,7 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
                                     .update("childTasks", FieldValue.arrayUnion((BaseTask) taskData))
                                     .addOnSuccessListener(unused -> {
                                         finish();
+                                        CurrentTaskHelper.instance.setTaskData(null);
                                     })
                                     .addOnFailureListener(e -> {
                                         showSnackbar("Error adding board");

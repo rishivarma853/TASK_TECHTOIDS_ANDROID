@@ -72,7 +72,7 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
             Intent intent = new Intent(ViewTaskActivity.this, ViewTaskActivity.class);
             intent.putExtra("boardId", taskData.getBoardId());
             String taskId = getIntent().getStringExtra("taskId");
-            intent.putExtra("BaseTaskId", taskId);
+            intent.putExtra("baseTaskId", taskId);
             intent.putExtra("taskId", taskData.getTaskId());
             intent.putExtra("isParent", false);
             startActivity(intent);
@@ -290,24 +290,24 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
 
     public void updateUI() {
         String taskId = getIntent().getStringExtra("taskId");
-        String BaseTaskId = getIntent().getStringExtra("BaseTaskId");
+        String baseTaskId = getIntent().getStringExtra("baseTaskId");
         boolean isParent = getIntent().getBooleanExtra("isParent", false);
         if (isParent) {
-            binding.fabLayout.fab.setVisibility(View.GONE);
-        } else {
             binding.fabLayout.fab.setVisibility(View.VISIBLE);
+        } else {
+            binding.fabLayout.fab.setVisibility(View.GONE);
         }
         System.out.println(isParent);
         if (taskId != null) {
             documentReference = FirebaseHelper.getTasksCollection()
-                    .document(BaseTaskId == null ? taskId : BaseTaskId);
+                    .document(baseTaskId == null ? taskId : baseTaskId);
             documentReference.get()
                     .addOnSuccessListener(documentSnapshotTask -> {
-                        BaseTask BaseTask = documentSnapshotTask.toObject(BaseTask.class);
+                        BaseTask baseTask = documentSnapshotTask.toObject(BaseTask.class);
                         if (isParent) {
-                            task = BaseTask;
-                        } else if (BaseTask.getChildTasks() != null) {
-                            task = BaseTask.getChildTasks().stream()
+                            task = baseTask;
+                        } else if (baseTask.getChildTasks() != null) {
+                            task = baseTask.getChildTasks().stream()
                                     .filter(temp -> temp.getTaskId().equals(taskId))
                                     .collect(Collectors.toList()).get(0);
                         }
@@ -361,9 +361,13 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
         Intent intent = new Intent(ViewTaskActivity.this, AddTaskActivity.class);
         String taskId = getIntent().getStringExtra("taskId");
         String boardId = getIntent().getStringExtra("boardId");
+        String baseTaskId = getIntent().getStringExtra("baseTaskId");
+        boolean isParent = getIntent().getBooleanExtra("isParent", false);
         intent.putExtra("boardId", boardId);
+        if (baseTaskId != null)
+            intent.putExtra("baseTaskId", baseTaskId);
         intent.putExtra("taskId", taskId);
-        intent.putExtra("isParent", true);
+        intent.putExtra("isParent", isParent);
         startActivity(intent);
     }
 
