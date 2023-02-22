@@ -97,7 +97,7 @@ public class TaskScreenActivity extends AppCompatActivity implements SearchView.
                 }
 
                 public void onDrag(int oldPosition, int newPosition) {
-                    if (BasicHelper.isNetworkAvailable(TaskScreenActivity.this)) {
+                    if (BasicHelper.isNetworkAvailable(TaskScreenActivity.this) && oldPosition != newPosition) {
                         System.out.println("called " + oldPosition + " - " + newPosition);
 //                    Collections.swap(adapter.getSnapshots(), oldPosition, newPosition);
                         adapter.notifyItemMoved(oldPosition, newPosition);

@@ -51,8 +51,8 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
             List<BaseTask> inProgressTask = model.getChildTasks().stream().filter(task -> task.getTaskStatus() == TaskStatus.IN_PROGRESS).collect(Collectors.toList());
             List<BaseTask> completedTask = model.getChildTasks().stream().filter(task -> task.getTaskStatus() == TaskStatus.COMPLETED).collect(Collectors.toList());
 
-            int inProgressPercent = (inProgressTask.size() * 100) / model.getChildTasks().size();
             int completePercent = (completedTask.size() * 100) / model.getChildTasks().size();
+            int inProgressPercent = Math.min(((inProgressTask.size() * 100) / model.getChildTasks().size()) + completePercent, 100);
 
             holder.binding.taskProgressPercent.setText(completePercent + "%");
             holder.binding.taskProgressBar.setProgress(completePercent);
