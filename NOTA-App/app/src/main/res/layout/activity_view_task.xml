@@ -34,13 +34,22 @@
                 android:imeOptions="actionDone"
                 android:inputType="text|textCapSentences"
                 android:padding="8dp"
-                android:textSize="24sp" />
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
-            <androidx.appcompat.widget.AppCompatSpinner
-                android:id="@+id/task_status"
+            <androidx.cardview.widget.CardView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:spinnerMode="dropdown" />
+                android:layout_height="wrap_content">
+
+                <androidx.appcompat.widget.AppCompatSpinner
+                    android:id="@+id/task_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/spinner_bg"
+                    android:paddingEnd="16dp"
+                    style="@style/Spinner"
+                    android:spinnerMode="dropdown" />
+            </androidx.cardview.widget.CardView>
 
             <com.techtoids.nota.view.custom.EditorTextView
                 android:id="@+id/task_description"
