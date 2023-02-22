@@ -83,6 +83,8 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
         long millisecondsDiff = TimeUnit.MILLISECONDS.convert(timeDiff, TimeUnit.MILLISECONDS);
         if (millisecondsDiff < 0) {
             binding.taskDue.setBackgroundColor(ContextCompat.getColor(context, R.color.error));
+        } else{
+            binding.taskDue.setBackgroundColor(ContextCompat.getColor(context, R.color.secondary_color));
         }
     }
 
