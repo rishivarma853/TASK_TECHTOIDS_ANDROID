@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.techtoids.nota.R;
 import com.techtoids.nota.databinding.TaskListItemBinding;
 import com.techtoids.nota.helper.BasicHelper;
 import com.techtoids.nota.model.BaseTask;
@@ -41,6 +42,7 @@ public class ChildTaskListAdapter extends RecyclerView.Adapter<TaskViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
         BaseTask model = taskList.get(position);
+        holder.binding.taskIcon.setImageResource(R.drawable.subtask);
         holder.binding.taskTitle.setText(model.getTitle());
         holder.setTaskStatus(model.getTaskStatus());
         holder.binding.taskDue.setText(BasicHelper.getDaysDue(model.getDueDate()));

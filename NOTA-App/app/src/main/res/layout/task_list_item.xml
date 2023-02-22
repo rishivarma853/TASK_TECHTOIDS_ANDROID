@@ -25,7 +25,7 @@
                 android:layout_gravity="center"
                 android:layout_weight="0"
                 android:adjustViewBounds="true"
-                android:src="@drawable/task_todo_icon" />
+                android:src="@drawable/task" />
 
             <LinearLayout
                 android:layout_width="0dp"
