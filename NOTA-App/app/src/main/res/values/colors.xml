@@ -7,4 +7,20 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="chambray">#FF2C5585</color>
+    <color name="downy">#FF63BBCB</color>
+    <color name="curious_blue">#FF2C89BE</color>
+    <color name="steel_blue">#FF4484A4</color>
+    <color name="primary_color">@color/chambray</color>
+    <color name="secondary_color">@color/downy</color>
+    <color name="teritiary_color">@color/curious_blue</color>
+    <color name="quadrary_color">@color/steel_blue</color>
+    <color name="task_todo_foreground">#FF880000</color>
+    <color name="task_todo_background">#FFFFAAAA</color>
+    <color name="task_inprogress_foreground">#FF000088</color>
+    <color name="task_inprogress_background">#FFAAAAFF</color>
+    <color name="task_completed_foreground">#FF008800</color>
+    <color name="task_completed_background">#FFAAFFAA</color>
+    <color name="error">#f44336</color>
+    <color name="warning">#ffa726</color>
 </resources>
