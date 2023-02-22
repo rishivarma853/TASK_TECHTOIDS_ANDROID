@@ -31,17 +31,15 @@ public class MoveBoardActivity extends AppCompatActivity {
                 .whereEqualTo("userId", FirebaseHelper.getCurrentUser().getUid())
                 .get()
                 .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        List<Board> list = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            Board board = document.toObject(Board.class);
-                            list.add(board);
-                        }
-                        if (list.size() > 0) {
-                            adapter = new ActivityListAdapter(this::onItemClick, list);
-                            binding.taskList.setAdapter(adapter);
-                            return;
-                        }
+                    List<Board> list = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        Board board = document.toObject(Board.class);
+                        list.add(board);
+                    }
+                    if (list.size() > 0) {
+                        adapter = new ActivityListAdapter(this::onItemClick, list);
+                        binding.taskList.setAdapter(adapter);
+                        return;
                     }
                     Toast.makeText(this, "No other boards available", Toast.LENGTH_SHORT).show();
                     finish();

@@ -234,6 +234,7 @@ public class ViewTaskActivity extends AppCompatActivity implements AttachmentAda
             CurrentTaskHelper.instance.setTaskData(task1);
             Intent intent = new Intent(ViewTaskActivity.this, MoveTaskActivity.class);
             intent.putExtra("taskId", task.getTaskId());
+            intent.putExtra("boardId", task.getBoardId());
             startActivity(intent);
         }
     }

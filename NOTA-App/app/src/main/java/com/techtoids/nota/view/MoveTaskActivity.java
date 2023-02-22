@@ -6,7 +6,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.WriteBatch;
@@ -29,22 +28,24 @@ public class MoveTaskActivity extends AppCompatActivity {
         binding = ActivityMoveTaskBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         String taskId = getIntent().getStringExtra("taskId");
+        String boardId = getIntent().getStringExtra("boardId");
         FirebaseHelper.getTasksCollection()
-                .whereEqualTo("userId", FirebaseHelper.getCurrentUser().getUid())
+                .whereEqualTo("boardId", boardId)
                 .whereNotEqualTo("taskId", taskId)
                 .get()
                 .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        List<BaseTask> list = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            BaseTask task1 = document.toObject(BaseTask.class);
-                            list.add(task1);
-                        }
+
+                    List<BaseTask> list = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        BaseTask task1 = document.toObject(BaseTask.class);
+                        list.add(task1);
+                    }
+                    if (list.size() == 0) {
+                        Toast.makeText(this, "No other tasks available", Toast.LENGTH_SHORT).show();
+                        finish();
+                    } else {
                         adapter = new ActivityListAdapter(list, this::onItemClick);
                         binding.taskList.setAdapter(adapter);
-                    } else {
-                        System.out.println(task.getException());
-                        Toast.makeText(this, "No other tasks available", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {

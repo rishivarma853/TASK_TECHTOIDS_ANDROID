@@ -43,11 +43,11 @@
 
                 <androidx.appcompat.widget.AppCompatSpinner
                     android:id="@+id/task_status"
+                    style="@style/Spinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/spinner_bg"
                     android:paddingEnd="16dp"
-                    style="@style/Spinner"
                     android:spinnerMode="dropdown" />
             </androidx.cardview.widget.CardView>
 
@@ -121,6 +121,7 @@
                 android:id="@+id/attachment_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:nestedScrollingEnabled="false"
                 android:scrollbars="none"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />

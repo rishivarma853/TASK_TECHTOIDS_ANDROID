@@ -389,7 +389,12 @@ public class AddTaskActivity extends AppCompatActivity implements DatePickerDial
     }
 
     private void addDocument() {
-        documentPickerLauncher.launch(FileHelper.getSelectDocumentIntent());
+        System.out.println(getAttachmentList().size());
+        if (getAttachmentList().size() <= 10) {
+            documentPickerLauncher.launch(FileHelper.getSelectDocumentIntent());
+        } else {
+            Toast.makeText(this, "Can only add max 10 attachments", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void openDocument(Uri documentUri) {
