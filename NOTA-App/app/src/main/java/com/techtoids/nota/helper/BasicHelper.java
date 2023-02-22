@@ -5,10 +5,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.widget.Toast;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 public class BasicHelper {
@@ -25,7 +22,7 @@ public class BasicHelper {
         long dateBeforeInMs = date.getTime();
         long dateAfterInMs = new Date().getTime();
 
-        long timeDiff = Math.abs(dateAfterInMs - dateBeforeInMs);
+        long timeDiff = dateBeforeInMs - dateAfterInMs;
 
         long daysDiff = TimeUnit.DAYS.convert(timeDiff, TimeUnit.MILLISECONDS);
         if (daysDiff > 0) {
@@ -39,8 +36,12 @@ public class BasicHelper {
         if (minuteDiff > 0) {
             return minuteDiff + " Mins to due";
         }
-        return "Due soon";
+        long millisecondsDiff = TimeUnit.MILLISECONDS.convert(timeDiff, TimeUnit.MILLISECONDS);
 
+        if (millisecondsDiff > 0) {
+            return "Due soon";
+        }
+        return "Overdue";
     }
 
     public static boolean isNetworkAvailable(Context context) {

@@ -13,7 +13,9 @@ import com.techtoids.nota.helper.BasicHelper;
 import com.techtoids.nota.model.BaseTask;
 import com.techtoids.nota.model.TaskStatus;
 
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class TaskViewHolder extends RecyclerView.ViewHolder {
@@ -42,6 +44,7 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
         } else {
             holder.binding.taskDue.setVisibility(View.VISIBLE);
         }
+        holder.setDueDateColor(model.getDueDate());
         holder.setTaskStatus(model.getTaskStatus());
         if (childTaskCount > 0) {
             holder.binding.subtaskCount.setText(String.valueOf(childTaskCount));
@@ -71,6 +74,16 @@ public class TaskViewHolder extends RecyclerView.ViewHolder {
             holder.binding.subtaskCount.setVisibility(View.GONE);
         }
 
+    }
+
+    public void setDueDateColor(Date date) {
+        long dateBeforeInMs = date.getTime();
+        long dateAfterInMs = new Date().getTime();
+        long timeDiff = dateBeforeInMs - dateAfterInMs;
+        long millisecondsDiff = TimeUnit.MILLISECONDS.convert(timeDiff, TimeUnit.MILLISECONDS);
+        if (millisecondsDiff < 0) {
+            binding.taskDue.setBackgroundColor(ContextCompat.getColor(context, R.color.error));
+        }
     }
 
     public void setTaskStatus(TaskStatus taskStatus) {

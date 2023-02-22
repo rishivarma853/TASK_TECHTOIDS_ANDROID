@@ -46,6 +46,7 @@ public class ChildTaskListAdapter extends RecyclerView.Adapter<TaskViewHolder> {
         holder.binding.taskTitle.setText(model.getTitle());
         holder.setTaskStatus(model.getTaskStatus());
         holder.binding.taskDue.setText(BasicHelper.getDaysDue(model.getDueDate()));
+        holder.setDueDateColor(model.getDueDate());
         if (model.getTaskStatus() == TaskStatus.COMPLETED) {
             holder.binding.taskDue.setVisibility(View.GONE);
         } else {
